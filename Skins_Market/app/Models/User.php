@@ -2,45 +2,67 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Filament\Models\Contracts\FilamentUser;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    // Campos que se pueden asignar masivamente
     protected $fillable = [
-        'nombre',
+        'name',      // antes 'nombre'
         'email',
-        'contraseña',
-        'foto_perfil',
-        'confirmacion_email',
+        'password',  // ahora coincide con la columna
+        'role',
+        'profile_photo',
+        'email_verified_at',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
+    // Campos ocultos en arrays/JSON
     protected $hidden = [
-        'password',
+        'contraseña',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
+    // Casting de atributos
     protected $casts = [
+        'confirmacion_email' => 'boolean',
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Devuelve la contraseña para Auth
+     */
+    public function getAuthPassword()
+    {
+        return $this->contraseña;
+    }
+
+    /**
+     * Verifica si el usuario puede acceder a Filament
+     */
+    public function canAccessFilament(): bool
+    {
+        return true;  // Siempre devuelve 'true' para permitir el acceso sin restricciones
+    }
+
+    /**
+     * Devuelve el nombre que Filament mostrará
+     */
+    public function getFilamentName(): string
+    {
+        // ⚡ fallback seguro si nombre es null o vacío
+        return $this->nombre ?: 'Administrador';
+    }
+
+    /**
+     * Opcional: devuelve la foto de perfil para Filament
+     */
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->foto_perfil ?: null;
+    }
 }

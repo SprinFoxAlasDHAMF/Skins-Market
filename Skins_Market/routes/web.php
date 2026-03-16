@@ -15,4 +15,12 @@ use Illuminate\Support\Facades\Route;
 
 
 
-
+// routes/web.php
+Route::get('/login', function () {
+    // Si l'usuari ja està autenticat, el redirigeix al dashboard
+    if (auth()->check()) {
+        return redirect()->route('filament.auth.dashboard');
+    }
+    // Si no està autenticat, es deixa a la pàgina de login
+    return view('auth.login');
+})->name('login');
