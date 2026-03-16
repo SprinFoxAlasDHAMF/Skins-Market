@@ -9,7 +9,7 @@ use App\Http\Controllers\CalidadController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\FilterController;
 use App\Http\Controllers\Admin\ItemAdminController;
-
+use App\Http\Controllers\StripeController;
 /*
 |--------------------------------------------------------------------------
 | AUTH
@@ -67,3 +67,6 @@ Route::prefix('admin')->group(function () {
 
 
 
+
+
+Route::post('/depositar', [StripeController::class, 'depositar']);
