@@ -88,7 +88,7 @@ class CarritoController extends Controller
             ], 400);
         }
 
-        // Reducir saldo del usuario
+        // Reducir saldo del usuario s
         $usuario->dinero -= $total;
         $usuario->save();
 
@@ -101,7 +101,7 @@ class CarritoController extends Controller
             'estado' => 'completada'
         ]);
 
-        // Crear detalles de factura
+        // Crear detalles de factura 
         foreach ($carrito as $c) {
             \App\Models\FacturaDetalle::create([
                 'factura_id' => $factura->id,
