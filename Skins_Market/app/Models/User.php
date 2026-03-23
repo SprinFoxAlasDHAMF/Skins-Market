@@ -2,45 +2,66 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Filament\Models\Contracts\FilamentUser;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, Notifiable;
+    // Define la tabla explícitamente si es necesario
+    protected $table = 'users';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'nombre',
         'email',
-        'contraseña',
+        'password',  // Asegúrate de usar 'password' (no 'contraseña')
+        'role',
         'foto_perfil',
         'confirmacion_email',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
-        'password',
+        'password',  // Asegúrate de ocultar la contraseña al serializar el modelo
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'confirmacion_email' => 'boolean',
     ];
+
+    public function getAuthPassword()
+    {
+        return $this->password;  // Retorna la columna 'password'
+    }
+
+    /**
+     * Verifica si el usuario puede acceder a Filament
+     */
+    public function canAccessFilament(): bool
+    {
+        return $this->rol == 'admin';  // Asegúrate de que el rol sea 'admin'
+    }
+
+    /**
+     * Devuelve el nombre que Filament mostrará
+     */
+    public function getFilamentName(): string
+    {
+        return $this->nombre ?: 'Administrador';  // El nombre del usuario
+    }
+
+    /**
+     * Opcional: devuelve la foto de perfil para Filament
+     */
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->foto_perfil ?: null;  // Foto de perfil si está disponible
+    }
+
+    public function favoritos()
+    {
+        return $this->belongsToMany(Item::class, 'favoritos', 'usuario_id', 'item_id')->withTimestamps();
+    }
 }
