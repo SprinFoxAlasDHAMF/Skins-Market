@@ -23,4 +23,9 @@ class Item extends Model
     {
         return $this->hasMany(Arma::class, 'item_id', 'id');
     }
+
+    public function usuariosFavoritos()
+    {
+        return $this->belongsToMany(User::class, 'favoritos', 'item_id', 'usuario_id')->withTimestamps();
+    }
 }

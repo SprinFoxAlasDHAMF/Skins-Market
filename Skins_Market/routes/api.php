@@ -17,7 +17,24 @@ use App\Http\Controllers\StripeController;
 */
 
 Route::post('/register', [RegisterController::class, 'register']);
-Route::post('/login', [LoginController::class, 'login']);
+Route::post('/login', function (Request $request) {
+    // Validar los datos del login
+    $credentials = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    if (Auth::attempt($credentials)) {
+        $user = Auth::user();
+
+        // Generar un token personal
+        $token = $user->createToken('ReactApp')->plainTextToken;
+
+        return response()->json(['token' => $token]);
+    }
+
+    return response()->json(['message' => 'Unauthorized'], 401);
+});
 
 Route::middleware('auth:sanctum')->post('/logout', [LoginController::class, 'logout']);
 
@@ -66,7 +83,24 @@ Route::prefix('admin')->group(function () {
 });
 
 
-
-
+//Añadir a Favoritos
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/favoritos/toggle/{item_id}', [UserPerfilController::class, 'toggleFavorito']);
+    Route::get('/favoritos', [UserPerfilController::class, 'favoritos']);
+});
 
 Route::post('/depositar', [StripeController::class, 'depositar']);
+//Ruta para ver lo que un usuario ha comprado
+Route::middleware('auth:sanctum')->get('/usuario/compras', [UserPerfilController::class, 'compras']);
+//Para ver lo que posee
+Route::middleware('auth:sanctum')->get('/usuario/inventario', [UserPerfilController::class, 'inventario']);
+
+//Carrito 
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/carrito', [CarritoController::class, 'index']);
+    Route::post('/carrito', [CarritoController::class, 'agregar']);
+    Route::put('/carrito/{item_id}', [CarritoController::class, 'actualizar']);
+    Route::delete('/carrito/{item_id}', [CarritoController::class, 'eliminar']);
+    Route::middleware('auth:sanctum')->post('/carrito/checkout', [CarritoController::class, 'checkout']);
+});

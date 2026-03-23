@@ -10,35 +10,30 @@ use Filament\Models\Contracts\FilamentUser;
 class User extends Authenticatable implements FilamentUser
 {
     use HasApiTokens, Notifiable;
+    // Define la tabla explícitamente si es necesario
+    protected $table = 'users';
 
-    // Campos que se pueden asignar masivamente
     protected $fillable = [
-        'name',      // antes 'nombre'
+        'nombre',
         'email',
-        'password',  // ahora coincide con la columna
+        'password',  // Asegúrate de usar 'password' (no 'contraseña')
         'role',
-        'profile_photo',
-        'email_verified_at',
+        'foto_perfil',
+        'confirmacion_email',
     ];
 
-    // Campos ocultos en arrays/JSON
     protected $hidden = [
-        'contraseña',
+        'password',  // Asegúrate de ocultar la contraseña al serializar el modelo
         'remember_token',
     ];
 
-    // Casting de atributos
     protected $casts = [
         'confirmacion_email' => 'boolean',
-        'email_verified_at' => 'datetime',
     ];
 
-    /**
-     * Devuelve la contraseña para Auth
-     */
     public function getAuthPassword()
     {
-        return $this->contraseña;
+        return $this->password;  // Retorna la columna 'password'
     }
 
     /**
@@ -46,7 +41,7 @@ class User extends Authenticatable implements FilamentUser
      */
     public function canAccessFilament(): bool
     {
-        return true;  // Siempre devuelve 'true' para permitir el acceso sin restricciones
+        return $this->rol == 'admin';  // Asegúrate de que el rol sea 'admin'
     }
 
     /**
@@ -54,8 +49,7 @@ class User extends Authenticatable implements FilamentUser
      */
     public function getFilamentName(): string
     {
-        // ⚡ fallback seguro si nombre es null o vacío
-        return $this->nombre ?: 'Administrador';
+        return $this->nombre ?: 'Administrador';  // El nombre del usuario
     }
 
     /**
@@ -63,6 +57,11 @@ class User extends Authenticatable implements FilamentUser
      */
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->foto_perfil ?: null;
+        return $this->foto_perfil ?: null;  // Foto de perfil si está disponible
+    }
+
+    public function favoritos()
+    {
+        return $this->belongsToMany(Item::class, 'favoritos', 'usuario_id', 'item_id')->withTimestamps();
     }
 }
