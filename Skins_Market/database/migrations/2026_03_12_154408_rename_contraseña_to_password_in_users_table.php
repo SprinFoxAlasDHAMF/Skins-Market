@@ -12,9 +12,11 @@ return new class extends Migration
      * @return void
      */
     public function up() {
-        Schema::table('usuarios', function (Blueprint $table) {
-            $table->renameColumn('contraseña', 'password');
-        });
+        if (Schema::hasTable('users') && Schema::hasColumn('users', 'contraseña')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->renameColumn('contraseña', 'password');
+            });
+        }
     }
 
     /**
@@ -24,8 +26,12 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('password_in_users', function (Blueprint $table) {
-            //
-        });
+        if (Schema::hasTable('users') && Schema::hasColumn('users', 'password')) {
+            Schema::table('users', function (Blueprint $table) {
+                if (!Schema::hasColumn('users', 'contraseña')) {
+                    $table->renameColumn('password', 'contraseña');
+                }
+            });
+        }
     }
 };

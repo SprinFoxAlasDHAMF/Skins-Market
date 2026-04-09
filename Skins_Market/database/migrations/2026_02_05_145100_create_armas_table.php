@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('arma', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->constrained()->onDelete('cascade');
+            $table->foreignId('item_id')->constrained('item')->onDelete('cascade');
             $table->foreignId('exterior_id')->constrained('exterior');
             $table->foreignId('categoria_id')->constrained('categoria');
             $table->timestamps();
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('armas');
+        Schema::dropIfExists('arma');
     }
 };

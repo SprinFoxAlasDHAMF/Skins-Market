@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('nombre');
             $table->string('email')->unique();
             $table->string('foto_perfil')->nullable();
-            $table->string('contraseña');
+            $table->string('password');
             $table->string('role')->default('user');
             $table->boolean('confirmacion_email')->default(false);
             $table->timestamps();
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('usuarios');
+        Schema::dropIfExists('users');
     }
 };
