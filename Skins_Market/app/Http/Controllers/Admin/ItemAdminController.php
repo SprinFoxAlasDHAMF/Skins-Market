@@ -12,10 +12,9 @@ class ItemAdminController extends Controller
     // Mostrar item para edición
     public function show($id)
     {
-        $item = Item::with('armas')->findOrFail($id);
+        $item = Item::with('arma')->findOrFail($id);
         return response()->json($item);
     }
-
     // Crear
     public function store(Request $request)
     {
@@ -30,12 +29,10 @@ class ItemAdminController extends Controller
             'color' => 'nullable|string|max:50',
             'foto' => 'nullable|image|max:2048',
         ]);
-
         // Manejo de la foto
         if ($request->hasFile('foto')) {
             $data['foto'] = $request->file('foto')->store('skins', 'public');
         }
-
         // Crear el Item
         $item = Item::create([
             'nombre' => $data['nombre'],
@@ -47,7 +44,6 @@ class ItemAdminController extends Controller
             'color' => $data['color'] ?? null,
             'foto' => $data['foto'] ?? null,
         ]);
-
         // Si es tipo arma, crear relación Arma
         if ($data['tipo'] === 'arma') {
             Arma::create([
@@ -56,19 +52,14 @@ class ItemAdminController extends Controller
                 'exterior_id' => $data['exterior_id'],
             ]);
         }
-
         return response()->json([
             'success' => true,
             'item' => $item,
         ]);
     }
-
-
-
     public function update(Request $request, $id)
     {
         $item = Item::findOrFail($id);
-
         $data = $request->validate([
             'nombre' => 'required|string|max:255',
             'precio' => 'required|numeric',
@@ -98,12 +89,9 @@ class ItemAdminController extends Controller
 
         return response()->json(['success' => true, 'item' => $item]);
     }
-
-
     public function destroy($id)
     {
         $item = Item::findOrFail($id);
-
         // Borrar arma relacionada si existe
         $item->armas()->delete();
 
@@ -111,6 +99,4 @@ class ItemAdminController extends Controller
 
         return response()->json(['message' => 'Item eliminado']);
     }
-
-
 }
