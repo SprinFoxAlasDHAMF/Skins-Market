@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
+import "../styles/UserPerfil.css";
 
 function UserPerfil() {
   const navigate = useNavigate();
@@ -14,10 +15,16 @@ function UserPerfil() {
   useEffect(() => {
     api.get("/user")
       .then(res => {
+        console.log("Datos del usuario:", res.data);
+        console.log("Foto perfil:", res.data.foto_perfil);
         setUser(res.data);
         setNombre(res.data.nombre);
         if (res.data.foto_perfil) {
-          setPreview(`http://localhost:8000/storage/${res.data.foto_perfil}`);
+          const fotoUrl = `http://localhost:8000/storage/${res.data.foto_perfil}`;
+          console.log("URL de la foto:", fotoUrl);
+          setPreview(fotoUrl);
+        } else {
+          console.log("No hay foto de perfil guardada");
         }
       })
       .catch(() => navigate("/login"));
@@ -66,24 +73,52 @@ function UserPerfil() {
     }
   };
 
-  if (!user) return <h2>Cargando...</h2>;
+  if (!user) return <h2 className="loading-text">Cargando...</h2>;
 
   return (
-    <div className="container mt-5">
-      <h2>Mi perfil</h2>
+    <div className="perfil-container">
+      <button className="btn-custom btn-secondary-custom mb-3" onClick={() => navigate("/skins")}>
+          ← Volver a Skins
+        </button>
+      <div className="perfil-header">
+        <h2>Mi perfil</h2>
+      </div>
 
-      {preview && (
-        <img
-          src={preview}
-          alt="Vista previa"
-          width={150}
-          className="mb-3"
-        />
+      
+
+      <form onSubmit={handleSubmit} encType="multipart/form-data" className="perfil-form">
+        <div className="form-group">
+          
+
+          {preview && (
+        <div className="perfil-foto-container">
+          <img
+            src={preview}
+            alt="Vista previa"
+            width={150}
+            className="perfil-foto mb-3"
+            onError={(e) => {
+              console.error("Error cargando imagen:", preview);
+              e.target.style.display = 'none';
+            }}
+          />
+          
+          <div className="form-group form-group-file text-center">
+            <label className="form-label form-label-subtle">Seleccionar nueva foto</label>
+            <input
+              type="file"
+              className={`form-control file-input ${errores.foto ? 'is-invalid' : ''}`}
+              onChange={handleFotoChange}
+            />
+            {errores.foto && (
+              <div className="invalid-feedback">
+                {errores.foto.join(", ")}
+              </div>
+            )}
+          </div>
+        </div>
       )}
-
-      <form onSubmit={handleSubmit} encType="multipart/form-data">
-        <div className="mb-3">
-          <label>Nombre</label>
+      <label className="form-label">Nombre</label>
           <input
             type="text"
             className={`form-control ${errores.nombre ? 'is-invalid' : ''}`}
@@ -98,30 +133,18 @@ function UserPerfil() {
           )}
         </div>
 
-        <div className="mb-3">
-          <label>Foto de perfil</label>
-          <input
-            type="file"
-            className={`form-control ${errores.foto ? 'is-invalid' : ''}`}
-            onChange={handleFotoChange}
-          />
-          {errores.foto && (
-            <div className="invalid-feedback">
-              {errores.foto.join(", ")}
-            </div>
-          )}
+        <div className="text-center">
+          <button type="submit" className="btn-custom btn-primary-custom">Guardar cambios</button>
         </div>
-
-        <button type="submit" className="btn btn-primary">Guardar cambios</button>
       </form>
 
-      <hr />
-
-      <h3>Saldo</h3>
-      <p>{user.saldo} €</p>
-      <button className="btn btn-success" onClick={() => navigate("/recargar")}>
-        Recargar saldo
-      </button>
+      <div className="saldo-section">
+        <h3>Saldo</h3>
+        <p className="saldo-amount">{user.saldo} €</p>
+        <button className="btn-custom btn-success-custom" onClick={() => navigate("/recargar")}>
+          Recargar saldo
+        </button>
+      </div>
     </div>
   );
 }
