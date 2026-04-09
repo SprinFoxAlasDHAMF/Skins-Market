@@ -15,15 +15,11 @@ class RegisterController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
-
-
         $user = User::create([
             'nombre' => $request->name,
             'email' => $request->email,
-            'contraseña' => Hash::make($request->password),
+            'password' => Hash::make($request->password),
         ]);
-
-        // Crear token automáticamente al registrarse
         $token = $user->createToken('react-token')->plainTextToken;
 
         return response()->json([
@@ -33,4 +29,3 @@ class RegisterController extends Controller
         ], 201);
     }
 }
-
