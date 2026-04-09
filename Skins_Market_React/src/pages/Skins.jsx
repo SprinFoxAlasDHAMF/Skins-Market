@@ -76,6 +76,7 @@ function Skins() {
         
       <div style={{ marginBottom: "1rem" }}>
         <button className="btn btn-secondary me-2" onClick={logout}>Logout</button>
+        <button className="btn btn-info me-2" onClick={() => navigate("/perfil")}>Mi Perfil</button>
         {isAdmin() && (
           <button className="btn btn-success" onClick={() => navigate("/admin/skins/new")}>
             Crear Skin / Arma
@@ -93,7 +94,7 @@ function Skins() {
               <select name="calidad_id" value={filters.calidad_id} onChange={handleChange} className="form-control">
                 <option value="">Seleccionar calidad</option>
                 {calidades.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-              </select>
+              </select> 
             </div>
 
             <div className="mb-3">

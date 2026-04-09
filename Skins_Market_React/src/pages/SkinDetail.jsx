@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { isLoggedIn, logout } from "../utils/auth";
 
 function SkinDetail() {
+  const navigate = useNavigate();
   const { id } = useParams(); // id de la skin
   const [item, setItem] = useState(null);
   const [exteriores, setExteriores] = useState([]);
@@ -19,10 +20,13 @@ function SkinDetail() {
     // Traer detalle de la skin
     api.get(`/skins/${id}`)
       .then(res => {
-        setItem(res.data.item);
-        setExteriores(res.data.exteriores);
+        const dataItem = res.data.item || res.data; // compatibilidad con distintas respuestas
+        setItem(dataItem);
+        setExteriores(res.data.exteriores || []);
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        console.error("Error cargando detalles de skin:", err);
+      })
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -40,13 +44,12 @@ function SkinDetail() {
 
   return (
     <div className="container mt-5">
-        <h2>{item.nombre}</h2>
-        <h4>Precio: ${item.precio}</h4>
-        <p>Calidad: {item.calidad}</p>
-        {item.armas?.[0]?.exterior && (
-        <p>Exterior: {item.armas[0].exterior.nombre}</p>
-        )}
-        <img
+      <button className="btn btn-secondary mb-3" onClick={() => navigate("/skins")}>← Volver a Skins</button>
+      <h2>{item.nombre}</h2>
+      <h4>Precio: ${item.precio}</h4>
+      <p>Calidad: {item.calidad?.nombre || item.calidad || 'N/A'}</p>
+      <p>Exterior: {firstArma?.exterior?.nombre || 'N/A'}</p>
+      <img
         src={item.foto ? `http://localhost:8000/storage/${item.foto}` : 'https://via.placeholder.com/150'}
         alt={item.nombre}
         style={{ maxWidth: "200px" }}
