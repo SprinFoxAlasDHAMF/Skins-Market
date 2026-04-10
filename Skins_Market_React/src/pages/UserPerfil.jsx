@@ -10,6 +10,11 @@ function UserPerfil() {
   const [preview, setPreview] = useState(null); // Estado para previsualización
   const [user, setUser] = useState(null);
   const [errores, setErrores] = useState({}); // Para errores de validación
+  
+  // Estados para controlar cambios
+  const [nombreInicial, setNombreInicial] = useState("");
+  const [fotoInicial, setFotoInicial] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
 
   // Cargar datos del usuario
   useEffect(() => {
@@ -19,6 +24,8 @@ function UserPerfil() {
         console.log("Foto perfil:", res.data.foto_perfil);
         setUser(res.data);
         setNombre(res.data.nombre);
+        setNombreInicial(res.data.nombre); // Guardar valor inicial
+        setFotoInicial(res.data.foto_perfil); // Guardar foto inicial
         if (res.data.foto_perfil) {
           const fotoUrl = `http://localhost:8000/storage/${res.data.foto_perfil}`;
           console.log("URL de la foto:", fotoUrl);
@@ -29,6 +36,13 @@ function UserPerfil() {
       })
       .catch(() => navigate("/login"));
   }, [navigate]);
+
+  // Detectar cambios en nombre o foto
+  useEffect(() => {
+    const nombreCambio = nombre !== nombreInicial;
+    const fotoCambio = foto !== null; // Si hay un archivo seleccionado, hay cambio
+    setHasChanges(nombreCambio || fotoCambio);
+  }, [nombre, nombreInicial, foto]);
 
   // Actualizar preview cuando el usuario selecciona una foto nueva
   const handleFotoChange = (e) => {
@@ -58,11 +72,15 @@ function UserPerfil() {
       setUser(res.data.user);
       alert("Perfil actualizado ✅");
 
+      // Resetear valores iniciales después de guardar
+      setNombreInicial(res.data.user.nombre);
+      setFotoInicial(res.data.user.foto_perfil);
+      setFoto(null); // Limpiar archivo seleccionado
+
       // Actualizar preview si cambió la foto
       if (res.data.user.foto_perfil) {
         setPreview(`http://localhost:8000/storage/${res.data.user.foto_perfil}`);
       }
-      setFoto(null); // Limpiar archivo seleccionado
     } catch (err) {
       if (err.response?.status === 422) {
         setErrores(err.response.data.errors);
@@ -134,7 +152,13 @@ function UserPerfil() {
         </div>
 
         <div className="text-center">
-          <button type="submit" className="btn-custom btn-primary-custom">Guardar cambios</button>
+          <button 
+            type="submit" 
+            className="btn-custom btn-primary-custom" 
+            disabled={!hasChanges}
+          >
+            Guardar cambios
+          </button>
         </div>
       </form>
 
