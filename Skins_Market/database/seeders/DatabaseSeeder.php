@@ -19,8 +19,14 @@ class DatabaseSeeder extends Seeder
             CategoriaSeeder::class,
             CalidadSeeder::class,
             ExteriorSeeder::class,
+            ColorSeeder::class,
+            ModoPegatinaSeeder::class,
+            PegatinaSeeder::class,
             ItemSeeder::class,
-            ArmaSeeder::class,
+            GuantesSeeder::class,
+            ArmaPegatinaSeeder::class,
+            LlaveroSeeder::class,
+            AgenteSeeder::class,
         ]);
     }
 }

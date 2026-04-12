@@ -13,7 +13,10 @@ class CategoriaSeeder extends Seeder
         Categoria::create(['nombre' => 'Francotiradores']);
         Categoria::create(['nombre' => 'Subfusiles']);
         Categoria::create(['nombre' => 'Guantes']);
+        Categoria::create(['nombre' => 'Cuchillos']);
         Categoria::create(['nombre' => 'Pegatinas']);
+        Categoria::create(['nombre' => 'Llaveros']);
+        Categoria::create(['nombre' => 'Agentes']);
     }
 }
 

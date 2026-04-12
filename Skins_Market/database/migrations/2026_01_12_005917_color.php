@@ -13,12 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('pegatina', function (Blueprint $table) {
+        Schema::create('colors', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
-            $table->foreignId('modo_pegatina_id')->constrained('modo_pegatina');
-            $table->decimal('precio', 10, 2);
-            $table->string('imagen')->nullable();
+            $table->string('nombre')->unique();
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('pegatina');
+        //
     }
 };
