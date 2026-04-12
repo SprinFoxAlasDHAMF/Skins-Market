@@ -96,7 +96,7 @@ class ItemSeeder extends Seeder
         ];
         
         // ======================================================
-        // 🔑 LLAVEROS (CHARMS)
+        // 🔑 LLAVEROS (CHARMS)sadsadasd
         // ======================================================
         $llaveros = [
             ['nombre'=>'AK-47 | Bullet Charm','color'=>'negro','precio'=>25,'foto'=>'items/llaveros/AK-47_Bullet_Charm.png','exterior_id'=>1],
