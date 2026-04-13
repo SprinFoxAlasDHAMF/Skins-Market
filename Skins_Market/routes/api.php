@@ -10,6 +10,7 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\FilterController;
 use App\Http\Controllers\Admin\ItemAdminController;
 use App\Http\Controllers\StripeController;
+use App\Http\Controllers\CarritoController; 
 /*
 |--------------------------------------------------------------------------
 | AUTH
@@ -17,24 +18,7 @@ use App\Http\Controllers\StripeController;
 */
 
 Route::post('/register', [RegisterController::class, 'register']);
-Route::post('/login', function (Request $request) {
-    // Validar los datos del login
-    $credentials = $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
-
-    if (Auth::attempt($credentials)) {
-        $user = Auth::user();
-
-        // Generar un token personal
-        $token = $user->createToken('ReactApp')->plainTextToken;
-
-        return response()->json(['token' => $token]);
-    }
-
-    return response()->json(['message' => 'Unauthorized'], 401);
-});
+Route::post('/login', [LoginController::class, 'login']);
 
 Route::middleware('auth:sanctum')->post('/logout', [LoginController::class, 'logout']);
 
