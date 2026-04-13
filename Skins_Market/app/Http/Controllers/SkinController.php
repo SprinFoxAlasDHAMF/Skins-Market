@@ -120,7 +120,7 @@ class SkinController extends Controller
                                 'id' => $p->id,
                                 'precio' => $p->precio,
     
-                                'modo' => [
+                                'modoPegatina' => [
                                     'id' => $p->modoPegatina->id ?? null,
                                     'nombre' => $p->modoPegatina->nombre ?? null,
                                 ]

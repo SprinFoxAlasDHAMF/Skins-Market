@@ -10,12 +10,24 @@ class Item extends Model
     use HasFactory;
 
     protected $table = 'item';
-    protected $fillable = ['nombre', 'color', 'precio', 'foto', 'calidad_id', 'tipo'];
+    protected $fillable = ['nombre', 'color', 'precio', 'foto', 'calidad_id', 'tipo', 'categoria_id', 'exterior_id', 'color_id'];
 
     // Relación con calidad
     public function calidad()
     {
         return $this->belongsTo(Calidad::class, 'calidad_id', 'id');
+    }
+
+    // Relación con categoría
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class, 'categoria_id', 'id');
+    }
+
+    // Relación con exterior
+    public function exterior()
+    {
+        return $this->belongsTo(Exterior::class, 'exterior_id', 'id');
     }
 
     // Relación con armas (variantes de este item)

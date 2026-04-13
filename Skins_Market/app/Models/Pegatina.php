@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\ModoPegatina;
 use App\Models\Arma;
+use App\Models\Item;
 
 class Pegatina extends Model
 {
