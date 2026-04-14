@@ -57,7 +57,23 @@ class UserPerfilController extends Controller
     public function favoritos()
     {
         $usuario = auth()->user();
-        $favoritos = $usuario->favoritos()->with(['calidad', 'armas.exterior', 'armas.categoria'])->get();
+        $items = $usuario->favoritos()->with(['calidad', 'armas.exterior', 'armas.categoria', 'color'])->get();
+
+        // Transformar al mismo formato que SkinController::index()
+        $favoritos = $items->map(function ($item) {
+            $arma = $item->armas->first();
+
+            return [
+                'id' => $item->id,
+                'nombre' => $item->nombre,
+                'color' => $item->color?->nombre,
+                'precio' => $item->precio,
+                'foto' => $item->foto,
+                'calidad' => $item->calidad->nombre ?? null,
+                'categoria' => $arma?->categoria->nombre,
+                'exterior' => $arma?->exterior->nombre,
+            ];
+        });
 
         return response()->json($favoritos);
     }

@@ -8,12 +8,13 @@ use App\Models\Arma;
 use App\Models\Calidad;
 use App\Models\Categoria;
 use App\Models\Exterior;
+use App\Models\Color;
 
 class SkinController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Item::with(['calidad', 'armas.exterior', 'armas.categoria']);
+        $query = Item::with(['calidad', 'armas.exterior', 'armas.categoria', 'color']);
 
         if ($request->filled('calidad_id')) {
             $query->where('calidad_id', $request->calidad_id);
@@ -32,7 +33,7 @@ class SkinController extends Controller
         }
 
         if ($request->filled('color')) {
-            $query->where('color', 'like', '%' . $request->color . '%');
+            $query->where('color_id', $request->color);
         }
 
         if ($request->filled('categoria_id')) {
@@ -53,7 +54,7 @@ class SkinController extends Controller
             return [
                 'id' => $item->id,
                 'nombre' => $item->nombre,
-                'color' => $item->color,
+                'color' => $item->color?->nombre,
                 'precio' => $item->precio,
                 'foto' => $item->foto,
                 'calidad' => $item->calidad->nombre ?? null,

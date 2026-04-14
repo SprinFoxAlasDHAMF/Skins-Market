@@ -26,7 +26,7 @@ class ItemAdminController extends Controller
             'calidad_id' => 'required|exists:calidad,id',
             'categoria_id' => 'required|exists:categoria,id',
             'exterior_id' => 'required|exists:exterior,id',
-            'color' => 'nullable|string|max:50',
+            'color_id' => 'nullable|exists:colors,id',
             'foto' => 'nullable|image|max:2048',
         ]);
         // Manejo de la foto
@@ -41,7 +41,7 @@ class ItemAdminController extends Controller
             'calidad_id' => $data['calidad_id'],
             'categoria_id' => $data['categoria_id'],
             'exterior_id' => $data['exterior_id'],
-            'color' => $data['color'] ?? null,
+            'color_id' => $data['color_id'] ?? null,
             'foto' => $data['foto'] ?? null,
         ]);
         // Si es tipo arma, crear relación Arma
@@ -67,7 +67,7 @@ class ItemAdminController extends Controller
             'calidad_id' => 'required|exists:calidad,id',
             'categoria_id' => 'required|exists:categoria,id',
             'exterior_id' => 'required|exists:exterior,id',
-            'color' => 'nullable|string|max:50',
+            'color_id' => 'nullable|exists:colors,id',
             'foto' => 'nullable|image|max:2048',
         ]);
 
