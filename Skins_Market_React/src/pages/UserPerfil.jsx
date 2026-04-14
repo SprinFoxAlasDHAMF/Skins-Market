@@ -106,21 +106,20 @@ function UserPerfil() {
 
       <form onSubmit={handleSubmit} encType="multipart/form-data" className="perfil-form">
         <div className="form-group">
-          
-
           {preview && (
-        <div className="perfil-foto-container">
-          <img
-            src={preview}
-            alt="Vista previa"
-            width={150}
-            className="perfil-foto mb-3"
-            onError={(e) => {
-              console.error("Error cargando imagen:", preview);
-              e.target.style.display = 'none';
-            }}
-          />
-          
+            <div className="perfil-foto-container">
+              <img
+                src={preview}
+                alt="Vista previa"
+                width={150}
+                className="perfil-foto mb-3"
+                onError={(e) => {
+                  console.error("Error cargando imagen:", preview);
+                  e.target.style.display = 'none';
+                }}
+              />
+            </div>
+          )}
           <div className="form-group form-group-file text-center">
             <label className="form-label form-label-subtle">Seleccionar nueva foto</label>
             <input
@@ -134,8 +133,9 @@ function UserPerfil() {
               </div>
             )}
           </div>
-        </div>
-      )}
+
+          
+
       <label className="form-label">Nombre</label>
           <input
             type="text"

@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import SkinDetail from "./pages/SkinDetail";
 import AdminForm from "./pages/AdminForm";
 import UserPerfil from "./pages/UserPerfil";
+import Favoritos from "./pages/Favoritos";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/perfil" element={<UserPerfil />} />
+        <Route path="/favoritos" element={<Favoritos />} />
         <Route path="/admin/skins/new" element={<AdminForm />} />
         <Route path="/admin/skins/:id/edit" element={<AdminForm />} />
       </Routes>

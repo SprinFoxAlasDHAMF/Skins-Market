@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { isLoggedIn, logout, isAdmin } from "../utils/auth";
+import "../styles/Skins.css";
 
 function Skins() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ function Skins() {
   const [calidades, setCalidades] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [exteriores, setExteriores] = useState([]);
+  const [colores, setColores] = useState([]);
   const [filters, setFilters] = useState({
     calidad_id: "",
     tipo: "",
@@ -34,6 +36,7 @@ function Skins() {
         setCalidades(res.data.calidades);
         setCategorias(res.data.categorias);
         setExteriores(res.data.exteriores);
+        setColores(res.data.colores || []);
       })
       .catch(err => console.error(err));
   }, [navigate]);
@@ -71,35 +74,39 @@ function Skins() {
   };
 
   return (
-    <div className="container mt-5">
-      <h1>Skins de CS:GO</h1>
-        
-      <div style={{ marginBottom: "1rem" }}>
-        <button className="btn btn-secondary me-2" onClick={logout}>Logout</button>
-        <button className="btn btn-info me-2" onClick={() => navigate("/perfil")}>Mi Perfil</button>
-        {isAdmin() && (
-          <button className="btn btn-success" onClick={() => navigate("/admin/skins/new")}>
-            Crear Skin / Arma
-          </button>
-        )}
+    <div className="skins-container">
+      <div className="skins-header">
+        <h1>Skins CS:GO</h1>
+        <div className="skins-header-actions">
+          <button className="btn-custom btn-secondary-custom" onClick={logout}>Logout</button>
+          <button className="btn-custom btn-secondary-custom" onClick={() => navigate("/perfil")}>Mi Perfil</button>
+          {!isAdmin() && (
+            <button className="btn-custom btn-secondary-custom" onClick={() => navigate("/favoritos")}>Favoritos</button>
+          )}
+          {isAdmin() && (
+            <button className="btn-custom btn-success-custom" onClick={() => navigate("/admin/skins/new")}>
+              Crear Skin
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="row mb-4">
+      <div className="skins-content">
         {/* FILTROS */}
-        <div className="col-md-4">
+        <div className="skins-filters">
           <h4>Filtros</h4>
           <form onSubmit={handleSubmit}>
-            <div className="mb-3">
+            <div className="filter-group">
               <label>Calidad</label>
-              <select name="calidad_id" value={filters.calidad_id} onChange={handleChange} className="form-control">
+              <select name="calidad_id" value={filters.calidad_id} onChange={handleChange}>
                 <option value="">Seleccionar calidad</option>
                 {calidades.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
               </select> 
             </div>
 
-            <div className="mb-3">
+            <div className="filter-group">
               <label>Tipo</label>
-              <select name="tipo" value={filters.tipo} onChange={handleChange} className="form-control">
+              <select name="tipo" value={filters.tipo} onChange={handleChange}>
                 <option value="">Seleccionar tipo</option>
                 <option value="arma">Arma</option>
                 <option value="guantes">Guantes</option>
@@ -107,78 +114,81 @@ function Skins() {
               </select>
             </div>
 
-            <div className="mb-3">
+            <div className="filter-group">
               <label>Categoría</label>
-              <select name="categoria_id" value={filters.categoria_id} onChange={handleChange} className="form-control">
+              <select name="categoria_id" value={filters.categoria_id} onChange={handleChange}>
                 <option value="">Seleccionar categoría</option>
                 {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
               </select>
             </div>
 
-            <div className="mb-3">
+            <div className="filter-group">
               <label>Exterior</label>
-              <select name="exterior_id" value={filters.exterior_id} onChange={handleChange} className="form-control">
+              <select name="exterior_id" value={filters.exterior_id} onChange={handleChange}>
                 <option value="">Seleccionar exterior</option>
                 {exteriores.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
               </select>
             </div>
 
-            <div className="mb-3">
+            <div className="filter-group">
               <label>Color</label>
-              <input type="text" name="color" value={filters.color} onChange={handleChange} placeholder="Ej: Rojo, Azul" className="form-control"/>
+              <select name="color" value={filters.color} onChange={handleChange}>
+                <option value="">Seleccionar color</option>
+                {colores.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+              </select>
             </div>
 
-            <div className="mb-3">
+            <div className="filter-group">
               <label>Precio mínimo</label>
-              <input type="number" name="precio_min" value={filters.precio_min} onChange={handleChange} className="form-control"/>
+              <input type="number" name="precio_min" value={filters.precio_min} onChange={handleChange} placeholder="$0"/>
             </div>
 
-            <div className="mb-3">
+            <div className="filter-group">
               <label>Precio máximo</label>
-              <input type="number" name="precio_max" value={filters.precio_max} onChange={handleChange} className="form-control"/>
+              <input type="number" name="precio_max" value={filters.precio_max} onChange={handleChange} placeholder="$9999"/>
             </div>
 
-            <button type="submit" className="btn btn-primary">Aplicar filtros</button>
+            <button type="submit" className="btn-apply-filters">Aplicar Filtros</button>
           </form>
         </div>
 
         {/* RESULTADOS */}
-        <div className="col-md-8">
+        <div className="skins-results">
           <h4>Skins Disponibles</h4>
-          {loading && <p>Cargando skins...</p>}
-          {!loading && skins.length === 0 && <p>No se encontraron skins con los filtros aplicados.</p>}
+          {loading && <p className="loading-text">Cargando skins...</p>}
+          {!loading && skins.length === 0 && <p className="no-results-text">No se encontraron skins</p>}
 
-          <div className="row">
+          <div className="skins-grid">
             {!loading && skins.map(skin => (
-              <div key={skin.id} className="col-md-4 mb-4">
-                <div className="card">
+              <div key={skin.id} className="skin-card">
                 <img
-                src={skin.foto ? `http://localhost:8000/storage/${skin.foto}` : '/placeholder.png'}
-                className="card-img-top"
-                alt={skin.nombre}
+                  src={`http://localhost:8000/${skin.foto}`}
+                  alt={skin.nombre}
+                  onError={(e) => e.target.src = 'https://via.placeholder.com/280x280?text=Sin+imagen'}
                 />
-                  <div className="card-body">
-                    <h5 className="card-title">{skin.nombre}</h5>
-                    <p>Precio: ${skin.precio}</p>
-                    <p>Calidad: {skin.calidad}</p>
-                    <p>Categoría: {skin.categoria}</p>
-                    <p>Exterior: {skin.exterior}</p>
-                    <p>Color: {skin.color}</p>
+                <div className="skin-card-body">
+                  <h5>{skin.nombre}</h5>
+                  <p><strong>${skin.precio}</strong></p>
+                  {skin.calidad && <p><span>Calidad:</span> <strong>{skin.calidad}</strong></p>}
+                  {skin.categoria && <p><span>Categoría:</span> <strong>{skin.categoria}</strong></p>}
+                  {skin.exterior && <p><span>Exterior:</span> <strong>{skin.exterior}</strong></p>}
+                  {skin.color && <p><span>Color:</span> <strong>{skin.color}</strong></p>}
 
+                  <div className="skin-card-actions">
                     {isAdmin() && (
-                      <div className="mt-2">
-                        <button className="btn btn-warning btn-sm me-2" onClick={() => navigate(`/admin/skins/${skin.id}/edit`)}>
+                      <>
+                        <button className="btn-edit" onClick={() => navigate(`/admin/skins/${skin.id}/edit`)}>
                           Editar
                         </button>
-                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(skin.id)}>
+                        <button className="btn-delete" onClick={() => handleDelete(skin.id)}>
                           Borrar
                         </button>
-                      </div>
+                      </>
                     )}
+                    <button className="btn-view-details" onClick={() => navigate(`/skins/${skin.id}`)}>
+                      Ver Detalles
+                    </button>
                   </div>
-                  <button className="btn btn-primary mt-2 w-100" onClick={() => navigate(`/skins/${skin.id}`)}>
-                    Ver detalles
-                  </button>
                 </div>
               </div>
             ))}

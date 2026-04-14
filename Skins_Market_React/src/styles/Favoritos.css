@@ -1,0 +1,311 @@
+/* Estilos gamer para Favoritos.jsx */
+
+.favoritos-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 20px;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #1b1b1f 0%, #0c0c12 45%, #040405 100%);
+  color: #e6e9f0;
+}
+
+.favoritos-header {
+  text-align: center;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.favoritos-header h1 {
+  margin: 0 0 24px 0;
+  font-size: 2.5rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #f3f4ff;
+  text-shadow: 0 0 15px rgba(255, 165, 0, 0.5);
+  font-weight: 800;
+}
+
+.favoritos-header-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-custom {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary-custom {
+  background: linear-gradient(135deg, #ff8c00 0%, #ff6b00 100%);
+  color: #fff;
+}
+
+.btn-primary-custom:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(255, 140, 0, 0.4);
+}
+
+.btn-secondary-custom {
+  background: rgba(255, 255, 255, 0.04);
+  color: #9ea7bf;
+  border: 1px solid rgba(158, 167, 191, 0.18);
+  opacity: 0.75;
+}
+
+.btn-secondary-custom:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #dbe2ff;
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.loading-text {
+  text-align: center;
+  font-size: 18px;
+  color: #9ea7bf;
+  padding: 60px 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.empty-state {
+  background: linear-gradient(180deg, rgba(15, 18, 30, 0.96), rgba(8, 10, 20, 0.95));
+  border: 1px solid rgba(255, 165, 0, 0.25);
+  border-radius: 18px;
+  padding: 60px 40px;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+
+.empty-state p {
+  font-size: 24px;
+  color: #9ea7bf;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.favoritos-section {
+  background: linear-gradient(180deg, rgba(15, 18, 30, 0.96), rgba(8, 10, 20, 0.95));
+  border: 1px solid rgba(255, 165, 0, 0.25);
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+
+.favoritos-count {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  color: #9ea7bf;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.favoritos-count strong {
+  color: #ff8c00;
+  font-size: 18px;
+}
+
+.favoritos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.favorito-card {
+  background: linear-gradient(180deg, rgba(15, 18, 30, 0.96), rgba(8, 10, 20, 0.95));
+  border: 1px solid rgba(255, 165, 0, 0.15);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  transform: translateY(0);
+}
+
+.favorito-card:hover {
+  border-color: rgba(255, 165, 0, 0.4);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(255, 140, 0, 0.2);
+}
+
+.favorito-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.favorito-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.favorito-card:hover .favorito-image-wrapper img {
+  transform: scale(1.05);
+}
+
+.btn-remove-favorito {
+  position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.4); /* Fondo negro muy transparente */
+    color: rgba(255, 255, 255, 0.6); /* Cruz grisácea */
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.btn-remove-favorito:hover {
+  background: rgba(220, 53, 69, 0.8); /* Rojo suave solo al hacer hover */
+  color: white;
+  transform: scale(1.1);
+}
+
+.favorito-card-body {
+  padding: 20px;
+}
+
+.favorito-card h5 {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f3f4ff;
+  letter-spacing: 0.5px;
+}
+
+.favorito-card p {
+  margin: 6px 0;
+  font-size: 13px;
+  color: #b8c2dd;
+  display: flex;
+  justify-content: space-between;
+}
+
+.favorito-card p strong {
+  color: #d6d8ff;
+  font-weight: 600;
+}
+
+.favorito-card .precio {
+  font-size: 16px;
+  margin: 10px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 8px 0;
+}
+
+.favorito-card .precio strong {
+  color: #00d084;
+  font-size: 18px;
+}
+
+.favorito-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.btn-view-details {
+  flex: 1;
+  padding: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, #ff8c00 0%, #ff6b00 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-view-details:hover {
+  box-shadow: 0 4px 15px rgba(255, 140, 0, 0.4);
+  transform: translateY(-2px);
+}
+
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .favoritos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .favoritos-container {
+    padding: 20px 12px;
+  }
+
+  .favoritos-header h1 {
+    font-size: 2rem;
+  }
+
+  .favoritos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .favorito-image-wrapper {
+    height: 240px;
+  }
+
+  .favoritos-section {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .favoritos-container {
+    padding: 16px 10px;
+  }
+
+  .favoritos-header h1 {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+  }
+
+  .favoritos-header-actions {
+    gap: 8px;
+  }
+
+  .btn-custom {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .favoritos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .favorito-image-wrapper {
+    height: 200px;
+  }
+
+  .favorito-card-body {
+    padding: 16px;
+  }
+}

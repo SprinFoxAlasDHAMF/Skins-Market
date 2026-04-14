@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { isLoggedIn, logout } from "../utils/auth";
+import "../styles/SkinDetail.css";
 
 function SkinDetail() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ function SkinDetail() {
   const [exteriores, setExteriores] = useState([]);
   const [armasFiltradas, setArmasFiltradas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFavorito, setIsFavorito] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -28,6 +30,14 @@ function SkinDetail() {
         console.error("Error cargando detalles de skin:", err);
       })
       .finally(() => setLoading(false));
+
+    // Verificar si es favorito
+    api.get("/favoritos")
+      .then(res => {
+        const favIds = res.data.map(f => f.id);
+        setIsFavorito(favIds.includes(parseInt(id)));
+      })
+      .catch(err => console.error("Error verificando favoritos:", err));
   }, [id]);
 
   // Filtrar por exterior
@@ -37,78 +47,125 @@ function SkinDetail() {
       .catch(err => console.error(err));
   };
 
-  if (loading) return <p>Cargando...</p>;
-  if (!item) return <p>Skin no encontrada</p>;
+  // Toggle favorito
+  const toggleFavorito = () => {
+    api.post(`/favoritos/toggle/${id}`)
+      .then(res => {
+        console.log("Favorito toggled:", res.data);
+        setIsFavorito(!isFavorito);
+      })
+      .catch(err => console.error("Error toggling favorito:", err));
+  };
+
+  if (loading) return <p className="loading-message">⏳ Cargando detalles...</p>;
+  if (!item) return <p className="empty-state">❌ Skin no encontrada</p>;
 
   const firstArma = item.armas?.[0];
 
   return (
-    <div className="container mt-5">
-      <button className="btn btn-secondary mb-3" onClick={() => navigate("/skins")}>← Volver a Skins</button>
-      <h2>{item.nombre}</h2>
-      <h4>Precio: ${item.precio}</h4>
-      <p>Calidad: {item.calidad?.nombre || item.calidad || 'N/A'}</p>
-      <p>Exterior: {firstArma?.exterior?.nombre || 'N/A'}</p>
-      <img
-        src={item.foto ? `http://localhost:8000/storage/${item.foto}` : 'https://via.placeholder.com/150'}
-        alt={item.nombre}
-        style={{ maxWidth: "200px" }}
-        />
-
-      {/* Botones por exterior */}
-      <div className="mt-3">
-        <h5>Filtrar por Exterior:</h5>
-        {exteriores.map(ext => (
-          <button
-            key={ext.id}
-            className="btn btn-outline-primary me-2 mb-2"
-            onClick={() => filtrarExterior(ext.id)}
-          >
-            {ext.nombre}
-          </button>
-        ))}
+    <div className="skin-detail-container">
+      <div className="skin-detail-header">
+        <button className="btn-back" onClick={() => navigate("/skins")}>← Volver a Skins</button>
+        <button 
+          className={`btn-favorito ${isFavorito ? 'active' : ''}`}
+          onClick={toggleFavorito}
+          title={isFavorito ? "Remover de favoritos" : "Agregar a favoritos"}
+        >
+          {isFavorito ? '❤️' : '🤍'} {isFavorito ? 'En Favoritos' : 'Agregar a Favoritos'}
+        </button>
       </div>
 
-      {/* Pegatinas */}
-      {firstArma?.pegatinas?.length > 0 && (
-        <div className="mt-3">
-          <h5>Pegatinas:</h5>
-          {firstArma.pegatinas.map((p, i) => (
-            <span key={i} className="badge bg-warning me-1">{p.modoPegatina.nombre}</span>
-          ))}
+      <div className="skin-detail-main">
+        {/* Imagen Principal */}
+        <div className="skin-detail-image">
+          <img
+            src={item.foto ? `http://localhost:8000/${item.foto}` : 'https://via.placeholder.com/350'}
+            alt={item.nombre}
+            onError={(e) => e.target.src = 'https://via.placeholder.com/350?text=Sin+imagen'}
+          />
+        </div>
+
+        {/* Información de la Skin */}
+        <div className="skin-detail-info">
+          <div>
+            <h2>🎮 {item.nombre}</h2>
+            
+            <div className="skin-price">${item.precio}</div>
+
+            <div className="skin-attributes">
+              <div className="skin-attribute">
+                <span className="skin-attribute-label">Calidad:</span>
+                <span className="skin-attribute-value">{item.calidad?.nombre || 'N/A'}</span>
+              </div>
+              <div className="skin-attribute">
+                <span className="skin-attribute-label">Exterior:</span>
+                <span className="skin-attribute-value">{firstArma?.exterior?.nombre || 'N/A'}</span>
+              </div>
+            </div>
+
+            {firstArma?.pegatinas?.length > 0 && (
+              <div className="skin-pegatinas">
+                <h5>Pegatinas:</h5>
+                <div>
+                  {firstArma.pegatinas.map((p, i) => (
+                    <span key={i} className="pegatina-badge">{p.modoPegatina.nombre}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Filtro por Exterior */}
+      {exteriores.length > 0 && (
+        <div className="exterior-filters">
+          <h5>Filtrar por Exterior:</h5>
+          <div className="exterior-buttons">
+            {exteriores.map(ext => (
+              <button
+                key={ext.id}
+                className={`btn-exterior ${armasFiltradas.length > 0 ? 'active' : ''}`}
+                onClick={() => filtrarExterior(ext.id)}
+              >
+                {ext.nombre}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
       {/* Armas filtradas por exterior */}
       {armasFiltradas.length > 0 && (
-        <div className="row mt-4">
-          {armasFiltradas.map((arma, idx) => (
-            <div key={idx} className="col-md-4 mb-4">
-              <div className="card">
+        <div className="armas-section">
+          <h5>✨ Variantes Disponibles</h5>
+          <div className="armas-grid">
+            {armasFiltradas.map((arma, idx) => (
+              <div key={idx} className="arma-card">
                 <img
-                  src={arma.item.foto ? `http://localhost:8000/storage/${arma.item.foto}` : 'https://via.placeholder.com/150'}
+                  src={arma.item.foto ? `http://localhost:8000/${arma.item.foto}` : 'https://via.placeholder.com/280'}
                   alt={arma.item.nombre}
-                  className="card-img-top"
+                  onError={(e) => e.target.src = 'https://via.placeholder.com/280?text=Sin+imagen'}
                 />
-                <div className="card-body">
-                  <h5>{arma.item.nombre}</h5>
-                  <p>Precio: ${arma.item.precio}</p>
-                  <p>Categoría: {arma.categoria.nombre}</p>
-                  <p>Exterior: {arma.exterior.nombre}</p>
+                <div className="arma-card-body">
+                  <h6>{arma.item.nombre}</h6>
+                  <p><strong>${arma.item.precio}</strong></p>
+                  <p><strong>Categoría:</strong> {arma.categoria.nombre}</p>
+                  <p><strong>Exterior:</strong> {arma.exterior.nombre}</p>
 
                   {arma.pegatinas.length > 0 && (
-                    <div>
+                    <div className="arma-card-pegatinas">
                       {arma.pegatinas.map((p, i) => (
-                        <span key={i} className="badge bg-warning me-1">{p.modoPegatina.nombre}</span>
+                        <span key={i} className="pegatina-badge">{p.modoPegatina.nombre}</span>
                       ))}
                     </div>
                   )}
 
-                  <button className="btn btn-success mt-2">Comprar</button>
+                  <button className="btn-buy">Comprar</button>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>
