@@ -1,10 +1,11 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000/api", // tu backend Laravel
+  // 1. Asegúrate de que esta URL sea la de tu servidor PHP
+  baseURL: "http://localhost:8000/api", 
 });
 
-// Si guardas token de login, lo agrega automáticamente
+// 2. Este bloque es el más importante: envía el Token de login a Laravel
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {

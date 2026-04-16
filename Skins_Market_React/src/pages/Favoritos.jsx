@@ -43,7 +43,7 @@ function Favoritos() {
   return (
     <div className="favoritos-container">
       <div className="favoritos-header">
-        <h1>❤️ Mis Favoritos</h1>
+        <h1>Mis Favoritos</h1>
         <div className="favoritos-header-actions">
           <button className="btn-custom btn-secondary-custom" onClick={() => navigate("/skins")}>← Volver a Skins</button>
           <button className="btn-custom btn-secondary-custom" onClick={() => navigate("/perfil")}>Mi Perfil</button>
