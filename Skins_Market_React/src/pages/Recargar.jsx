@@ -3,9 +3,7 @@ import { Elements} from "@stripe/react-stripe-js";
 import CheckoutForm from "./CheckoutForm";
 import { useState } from "react";
 
-
-// Sustituye con tu Clave Pública de Stripe (pk_test_...)
-const stripePromise = loadStripe("pk_test_51SeyzmJCrp6PnkD4YcsvTjWMW33NTsUZjPX8dPT0Tc4XEWsDbPRkmrY4n0t94fMWIvToyh724CsjBlkkoxk56PpN00I1HOw52l");
+const stripePromise = loadStripe(process.env.STRIPE_KEY);
 
 function Recargar() {
   const [monto, setMonto] = useState(10);
