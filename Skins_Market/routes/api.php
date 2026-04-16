@@ -73,7 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/favoritos', [UserPerfilController::class, 'favoritos']);
 });
 
-Route::post('/depositar', [StripeController::class, 'depositar']);
+
 //Ruta para ver lo que un usuario ha comprado
 Route::middleware('auth:sanctum')->get('/usuario/compras', [UserPerfilController::class, 'compras']);
 //Para ver lo que posee
@@ -82,6 +82,7 @@ Route::middleware('auth:sanctum')->get('/usuario/inventario', [UserPerfilControl
 //Carrito 
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/depositar', [StripeController::class, 'depositar']);
     Route::get('/carrito', [CarritoController::class, 'index']);
     Route::post('/carrito', [CarritoController::class, 'agregar']);
     Route::put('/carrito/{item_id}', [CarritoController::class, 'actualizar']);

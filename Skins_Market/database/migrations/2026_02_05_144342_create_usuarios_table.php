@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('foto_perfil')->nullable();
             $table->string('password');
             $table->string('role')->default('user');
+            $table->decimal('amount', 8, 2)->default(0);
             $table->boolean('confirmacion_email')->default(false);
             $table->timestamps();
         });

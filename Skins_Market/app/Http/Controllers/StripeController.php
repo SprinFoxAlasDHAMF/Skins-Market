@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Stripe\Transfer;
 class StripeController extends Controller
 {
     public function depositar(Request $request)
@@ -34,7 +35,7 @@ class StripeController extends Controller
             'amount' => $request->amount * 100,  // Convertir a centavos
             'currency' => 'usd',  // O la moneda que prefieras
             'metadata' => [
-                'usuario_id' => $user->id,
+                'usuario_id' => auth()->id() ?? 1,
             ],
         ]);
 
