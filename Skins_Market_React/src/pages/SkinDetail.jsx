@@ -12,6 +12,7 @@ function SkinDetail() {
   const [armasFiltradas, setArmasFiltradas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFavorito, setIsFavorito] = useState(false);
+  const [exteriorActivo, setExteriorActivo] = useState(null); // ✅ NUEVO
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -22,7 +23,7 @@ function SkinDetail() {
     // Traer detalle de la skin
     api.get(`/skins/${id}`)
       .then(res => {
-        const dataItem = res.data.item || res.data; // compatibilidad con distintas respuestas
+        const dataItem = res.data.item || res.data;
         setItem(dataItem);
         setExteriores(res.data.exteriores || []);
       })
@@ -42,6 +43,8 @@ function SkinDetail() {
 
   // Filtrar por exterior
   const filtrarExterior = (exteriorId) => {
+    setExteriorActivo(exteriorId); // ✅ NUEVO
+
     api.get(`/skins/${id}/exterior/${exteriorId}`)
       .then(res => setArmasFiltradas(res.data.armas))
       .catch(err => console.error(err));
@@ -51,8 +54,9 @@ function SkinDetail() {
   const toggleFavorito = () => {
     api.post(`/favoritos/toggle/${id}`)
       .then(res => {
-        console.log("Favorito toggled:", res.data);
-        setIsFavorito(!isFavorito);
+        const favoritos = res.data.favoritos;
+
+        setIsFavorito(favoritos.includes(Number(id)));
       })
       .catch(err => console.error("Error toggling favorito:", err));
   };
@@ -76,7 +80,6 @@ function SkinDetail() {
       </div>
 
       <div className="skin-detail-main">
-        {/* Imagen Principal */}
         <div className="skin-detail-image">
           <img
             src={item.foto ? `http://localhost:8000/${item.foto}` : 'https://via.placeholder.com/350'}
@@ -85,11 +88,9 @@ function SkinDetail() {
           />
         </div>
 
-        {/* Información de la Skin */}
         <div className="skin-detail-info">
           <div>
             <h2>🎮 {item.nombre}</h2>
-            
             <div className="skin-price">${item.precio}</div>
 
             <div className="skin-attributes">
@@ -125,7 +126,7 @@ function SkinDetail() {
             {exteriores.map(ext => (
               <button
                 key={ext.id}
-                className={`btn-exterior ${armasFiltradas.length > 0 ? 'active' : ''}`}
+                className={`btn-exterior ${exteriorActivo === ext.id ? 'active' : ''}`} // ✅ FIX
                 onClick={() => filtrarExterior(ext.id)}
               >
                 {ext.nombre}
@@ -135,7 +136,12 @@ function SkinDetail() {
         </div>
       )}
 
-      {/* Armas filtradas por exterior */}
+      {/* 🔴 MENSAJE SI NO HAY RESULTADOS */}
+      {exteriorActivo && armasFiltradas.length === 0 && (
+        <p className="empty-state">❌ No hay armas con este exterior</p>
+      )}
+
+      {/* Armas filtradas */}
       {armasFiltradas.length > 0 && (
         <div className="armas-section">
           <h5>✨ Variantes Disponibles</h5>
@@ -143,25 +149,30 @@ function SkinDetail() {
             {armasFiltradas.map((arma, idx) => (
               <div key={idx} className="arma-card">
                 <img
-                  src={arma.item.foto ? `http://localhost:8000/${arma.item.foto}` : 'https://via.placeholder.com/280'}
-                  alt={arma.item.nombre}
+                  src={arma.foto ? `http://localhost:8000/${arma.foto}` : 'https://via.placeholder.com/280'}
+                  alt={arma.nombre}
                   onError={(e) => e.target.src = 'https://via.placeholder.com/280?text=Sin+imagen'}
                 />
                 <div className="arma-card-body">
-                  <h6>{arma.item.nombre}</h6>
-                  <p><strong>${arma.item.precio}</strong></p>
-                  <p><strong>Categoría:</strong> {arma.categoria.nombre}</p>
-                  <p><strong>Exterior:</strong> {arma.exterior.nombre}</p>
+                  <h6>{arma.nombre}</h6>
+                  <p><strong>${arma.precio}</strong></p>
+                  <p><strong>Categoría:</strong> {arma.categoria}</p>
+                  <p><strong>Exterior:</strong> {arma.exterior}</p>
 
-                  {arma.pegatinas.length > 0 && (
+                  {arma.pegatinas?.length > 0 && (
                     <div className="arma-card-pegatinas">
                       {arma.pegatinas.map((p, i) => (
-                        <span key={i} className="pegatina-badge">{p.modoPegatina.nombre}</span>
+                        <span key={i} className="pegatina-badge">{p.nombre}</span>
                       ))}
                     </div>
                   )}
 
-                  <button className="btn-buy">Comprar</button>
+                <button 
+                  className="btn-view-details" 
+                  onClick={() => navigate(`/skins/${arma.id}`)}
+                >
+                  Ver Detalles
+                </button>
                 </div>
               </div>
             ))}

@@ -28,6 +28,7 @@ class ItemSeeder extends Seeder
         // ======================================================
         $pistolas = [
             ['nombre'=>'Glock-18 | Fade','color'=>'morado','precio'=>250,'foto'=>'items/armas/glock-18-fade_factory_new.png','exterior_id'=>1],
+            ['nombre'=>'Glock-18 | Fade','color'=>'morado','precio'=>150,'foto'=>'items/armas/glock-18-fade_factory_new.png','exterior_id'=>3],
             ['nombre'=>'USP-S | Kill Confirmed','color'=>'rojo','precio'=>120,'foto'=>'items/armas/Kill-Confirmed_factory_new.png','exterior_id'=>1],
             ['nombre'=>'Desert Eagle | Blaze','color'=>'amarillo','precio'=>300,'foto'=>'items/armas/desert_eagle_factory_new.png','exterior_id'=>1],
             ['nombre'=>'P2000 | Fire Elemental','color'=>'rojo','precio'=>80,'foto'=>'items/armas/Fire_Elemental_Factory_new.png','exterior_id'=>1],

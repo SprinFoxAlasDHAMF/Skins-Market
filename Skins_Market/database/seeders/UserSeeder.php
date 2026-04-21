@@ -22,7 +22,13 @@ class UserSeeder extends Seeder
                 'role' => 'admin',
                 'confirmacion_email' => true,
             ]);
-
+            User::create([
+                'nombre' => 'ivan',          // Antes era 'name'
+                'email' => 'ivan@gmail.com',
+                'password' => Hash::make('12345678'),
+                'role' => 'user',
+                'confirmacion_email' => true,
+            ]);
             $this->command->info("Usuario administrador creado: {$adminEmail} / admin123");
         } else {
             $this->command->info("El administrador ya existe.");

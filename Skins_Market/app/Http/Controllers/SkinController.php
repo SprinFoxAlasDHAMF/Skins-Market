@@ -141,11 +141,28 @@ class SkinController extends Controller
         $item = Item::findOrFail($item_id);
 
         $armas = Arma::with(['item', 'categoria', 'pegatinas.modoPegatina', 'exterior'])
-                    ->whereHas('item', function($q) use ($item) {
-                        $q->where('nombre', $item->nombre);
+            ->whereHas('item', function($q) use ($item) {
+                $q->where('nombre', $item->nombre);
+            })
+            ->where('exterior_id', $exterior_id)
+            ->get()
+            ->map(function ($arma) {
+                return [
+                    'id' => $arma->item->id,
+
+                    'nombre' => $arma->item->nombre ?? null,
+                    'foto' => $arma->item->foto ?? null,
+                    'precio' => $arma->item->precio ?? null,
+                    'categoria' => $arma->categoria->nombre ?? null,
+                    'exterior' => $arma->exterior->nombre ?? null,
+
+                    'pegatinas' => $arma->pegatinas->map(function ($p) {
+                        return [
+                            'nombre' => $p->modoPegatina->nombre ?? null
+                        ];
                     })
-                    ->where('exterior_id', $exterior_id)
-                    ->get();
+                ];
+            });
 
         return response()->json([
             'armas' => $armas
