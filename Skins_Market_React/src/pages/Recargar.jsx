@@ -3,7 +3,7 @@ import { Elements} from "@stripe/react-stripe-js";
 import CheckoutForm from "./CheckoutForm";
 import { useState } from "react";
 
-const stripePromise = loadStripe(process.env.STRIPE_KEY);
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_KEY);
 
 function Recargar() {
   const [monto, setMonto] = useState(10);
