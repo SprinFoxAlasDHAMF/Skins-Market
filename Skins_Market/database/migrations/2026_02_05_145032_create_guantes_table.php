@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('guantes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->constrained('item');
+            $table->foreignId('item_id')->constrained('item')->onDelete('cascade');
             $table->foreignId('exterior_id')->constrained('exterior');
             $table->timestamps();
         });
