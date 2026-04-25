@@ -16,6 +16,10 @@ class SkinController extends Controller
     {
         $query = Item::with(['calidad', 'armas.exterior', 'armas.categoria', 'color']);
 
+        if ($request->filled('nombre')) {
+            $query->where('nombre', 'LIKE', '%' . $request->nombre . '%');
+        }
+        
         if ($request->filled('calidad_id')) {
             $query->where('calidad_id', $request->calidad_id);
         }
