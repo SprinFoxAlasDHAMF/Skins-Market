@@ -14,7 +14,11 @@ class ItemObserver
 
     public function updated(Item $item): void
     {
-        ItemTypeFactory::sync($item);
+        if ($item->isDirty('tipo')) {
+            ItemTypeFactory::migrateType($item);
+        } else {
+            ItemTypeFactory::sync($item);
+        }
     }
 
     public function deleted(Item $item): void

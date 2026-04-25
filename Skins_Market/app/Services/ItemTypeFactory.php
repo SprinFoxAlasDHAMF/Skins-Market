@@ -12,7 +12,7 @@ class ItemTypeFactory
     {
         match ($item->tipo) {
             'arma' => self::createArma($item),
-            'guante' => self::createGuantes($item),
+            'guantes' => self::createGuantes($item),
             'agente' => self::createAgentes($item),
             default => null,
         };
@@ -22,7 +22,7 @@ class ItemTypeFactory
     {
         match ($item->tipo) {
             'arma' => self::syncArma($item),
-            'guante' => self::syncGuantes($item),
+            'guantes' => self::syncGuantes($item),
             'agente' => self::syncAgentes($item),
             default => null,
         };
@@ -32,7 +32,7 @@ class ItemTypeFactory
     {
         match ($item->tipo) {
             'arma' => Arma::where('item_id', $item->id)->delete(),
-            'guante' => Guante::where('item_id', $item->id)->delete(),
+            'guantes' => Guante::where('item_id', $item->id)->delete(),
             'agente' => Agente::where('item_id', $item->id)->delete(),
             default => null,
         };
@@ -64,9 +64,9 @@ class ItemTypeFactory
 
     private static function createGuantes($item): void
     {
-        Guante::create([
+        \App\Models\Guante::create([
             'item_id' => $item->id,
-            'categoria_id' => $item->categoria_id ?? null,
+            'exterior_id' => $item->exterior_id,
         ]);
     }
 
@@ -75,7 +75,7 @@ class ItemTypeFactory
         Guante::updateOrCreate(
             ['item_id' => $item->id],
             [
-                'categoria_id' => $item->categoria_id ?? null,
+                'exterior_id' => $item->exterior_id ?? null,
             ]
         );
     }
@@ -95,5 +95,15 @@ class ItemTypeFactory
             ['item_id' => $item->id],
             []
         );
+    }
+    public static function migrateType($item): void
+    {
+        // 1. borrar de todos los tipos anteriores
+        \App\Models\Arma::where('item_id', $item->id)->delete();
+        \App\Models\Guante::where('item_id', $item->id)->delete();
+        \App\Models\Agente::where('item_id', $item->id)->delete();
+
+        // 2. crear en el nuevo tipo
+        self::handle($item);
     }
 }

@@ -10,7 +10,7 @@ class Guante extends Model
 
     protected $fillable = [
         'item_id',
-        'categoria_id',
+        'exterior_id',
     ];
 
     public function item()
