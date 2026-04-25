@@ -6,13 +6,15 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Filament\Models\Contracts\FilamentUser;
-
+use Filament\Panel;
 class User extends Authenticatable implements FilamentUser
 {
     use HasApiTokens, Notifiable;
     // Define la tabla explícitamente si es necesario
     protected $table = 'users';
+    public $timestamps = true;
 
+    protected $rememberTokenName = null;
     protected $fillable = [
         'nombre',
         'email',
@@ -42,17 +44,28 @@ class User extends Authenticatable implements FilamentUser
      */
     public function canAccessFilament(): bool
     {
-        return $this->rol == 'admin';  // Asegúrate de que el rol sea 'admin'
+        return $this->role == 'admin';  // Asegúrate de que el rol sea 'admin'
     }
 
     /**
      * Devuelve el nombre que Filament mostrará
      */
+    
     public function getFilamentName(): string
     {
-        return $this->nombre ?: 'Administrador';  // El nombre del usuario
+        return (string) ($this->nombre ?? 'Administrador');
+    }
+    
+    public function getEmailForPasswordReset(): string
+    {
+        return $this->email;
     }
 
+    public function getNameAttribute()
+    {
+        return $this->nombre;
+    }
+    
     /**
      * Opcional: devuelve la foto de perfil para Filament
      */
@@ -64,5 +77,9 @@ class User extends Authenticatable implements FilamentUser
     public function favoritos()
     {
         return $this->belongsToMany(Item::class, 'favoritos', 'usuario_id', 'item_id')->withTimestamps();
+    }
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->role === 'admin';
     }
 }
