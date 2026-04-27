@@ -150,7 +150,7 @@ class ItemSeeder extends Seeder
         // ======================================================
         // EJECUCIÓN
         // ======================================================
-        $createItems($pistolas, 'Rifles', 'arma'); // (puedes cambiarlo a Pistolas si lo añades)
+        $createItems($pistolas, 'Pistolas', 'arma'); // (puedes cambiarlo a Pistolas si lo añades)
         $createItems($rifles, 'Rifles', 'arma');
         $createItems($snipers, 'Francotiradores', 'arma');
         $createItems($smg, 'Subfusiles', 'arma');

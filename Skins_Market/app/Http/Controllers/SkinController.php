@@ -54,16 +54,16 @@ class SkinController extends Controller
 
         $items = $query->get()->map(function ($item) {
             $arma = $item->armas->first();
-
+        
             return [
                 'id' => $item->id,
                 'nombre' => $item->nombre,
                 'color' => $item->color?->nombre,
                 'precio' => $item->precio,
                 'foto' => $item->foto,
-                'calidad' => $item->calidad->nombre ?? null,
-                'categoria' => $arma?->categoria->nombre,
-                'exterior' => $arma?->exterior->nombre,
+                'calidad' => $item->calidad?->nombre,
+                'categoria' => $arma?->categoria?->nombre,
+                'exterior' => $arma?->exterior?->nombre,
             ];
         });
 
@@ -79,13 +79,10 @@ class SkinController extends Controller
             'armas.pegatinas.modoPegatina'
         ])->findOrFail($id);
     
-        // Todos los exteriores (para selector en frontend)
-        $exteriores = Exterior::all()->map(function ($ext) {
-            return [
-                'id' => $ext->id,
-                'nombre' => $ext->nombre
-            ];
-        });
+        $exteriores = Exterior::all()->map(fn($ext) => [
+            'id' => $ext->id,
+            'nombre' => $ext->nombre
+        ]);
     
         return response()->json([
             'item' => [
@@ -93,38 +90,42 @@ class SkinController extends Controller
                 'nombre' => $item->nombre,
                 'precio' => $item->precio,
                 'foto' => $item->foto,
-    
-                //modelo 3D
                 'modelo_3d' => $item->modelo_3d ?? null,
     
                 'calidad' => [
-                    'id' => $item->calidad->id ?? null,
-                    'nombre' => $item->calidad->nombre ?? null,
+                    'id' => $item->calidad?->id,
+                    'nombre' => $item->calidad?->nombre,
                 ],
     
                 'armas' => $item->armas->map(function ($arma) {
                     return [
-                        'item_id' => $arma->item_id,
+                        'id' => $arma->item_id,
+    
+                        'nombre' => $arma->item->nombre ?? null,
+                        'foto' => $arma->item->foto ?? null,
+                        'precio' => $arma->item->precio ?? null,
     
                         'categoria' => [
-                            'id' => $arma->categoria->id ?? null,
-                            'nombre' => $arma->categoria->nombre ?? null,
+                            'id' => $arma->categoria?->id,
+                            'nombre' => $arma->categoria?->nombre,
                         ],
     
                         'exterior' => [
-                            'id' => $arma->exterior->id ?? null,
-                            'nombre' => $arma->exterior->nombre ?? null,
+                            'id' => $arma->exterior?->id,
+                            'nombre' => $arma->exterior?->nombre,
                         ],
     
-                        // Añade información 3D y pegatinas del arma: modelo, textura y cada pegatina con su tipo
                         'modelo_3d' => $arma->modelo_3d ?? null,
                         'textura_3d' => $arma->textura_3d ?? null,
     
+                        // 🔥 PEGATINAS FIXED (IMPORTANTE)
                         'pegatinas' => $arma->pegatinas->map(function ($p) {
                             return [
                                 'id' => $p->id,
+                                'nombre' => $p->nombre ?? null,   // 🔥 AÑADE ESTO
+                                'imagen' => $p->imagen ?? null,   // 🔥 AÑADE ESTO
                                 'precio' => $p->precio,
-    
+                        
                                 'modoPegatina' => [
                                     'id' => $p->modoPegatina->id ?? null,
                                     'nombre' => $p->modoPegatina->nombre ?? null,
@@ -132,7 +133,7 @@ class SkinController extends Controller
                             ];
                         }),
                     ];
-                }),
+                })->values(),
             ],
     
             'exteriores' => $exteriores
@@ -162,9 +163,17 @@ class SkinController extends Controller
 
                     'pegatinas' => $arma->pegatinas->map(function ($p) {
                         return [
-                            'nombre' => $p->modoPegatina->nombre ?? null
+                            'id' => $p->id,
+                            'nombre' => $p->nombre,
+                            'precio' => $p->precio,
+                            'imagen' => $p->imagen,
+                    
+                            'modoPegatina' => [
+                                'id' => $p->modoPegatina?->id,
+                                'nombre' => $p->modoPegatina?->nombre,
+                            ]
                         ];
-                    })
+                    })->values(),
                 ];
             });
 
