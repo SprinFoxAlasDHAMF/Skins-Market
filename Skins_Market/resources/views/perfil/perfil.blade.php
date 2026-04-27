@@ -28,8 +28,7 @@
     <hr>
 
     <h3>Saldo</h3>
-    <p>{{ $usuario->saldo }} €</p>
-    <a href="/recargar">Recargar saldo</a>  
+    <p>{{ number_format($usuario->saldo_disponible ?? $usuario->saldo ?? $usuario->amount ?? 0, 2) }} {{ strtoupper($usuario->saldo_moneda ?? 'EUR') }}</p>
+    <a href="/recargar">Recargar saldo</a>
 </body>
 </html>
-

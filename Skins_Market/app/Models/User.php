@@ -19,6 +19,7 @@ class User extends Authenticatable implements FilamentUser
         'password',  // Asegúrate de usar 'password' (no 'contraseña')
         'role',
         'amount',
+        'stripe_account_id',
         'foto_perfil',
         'confirmacion_email',
     ];

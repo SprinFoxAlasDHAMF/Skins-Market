@@ -1,13 +1,29 @@
 <?php
 namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Stripe\Balance;
+use Stripe\Exception\ApiErrorException;
+use Stripe\Stripe;
 
 class UserPerfilController extends Controller
 {
     public function show()
     {
-        return response()->json(auth()->user());
+        $usuario = auth()->user();
+        $saldoStripe = $this->obtenerSaldoDisponibleStripe($usuario);
+
+        return response()->json(array_merge(
+            $usuario->toArray(),
+            [
+                'saldo' => $saldoStripe['amount'],
+                'saldo_disponible' => $saldoStripe['amount'],
+                'saldo_disponible_centavos' => $saldoStripe['amount_in_cents'],
+                'saldo_moneda' => $saldoStripe['currency'],
+                'saldo_fuente' => $saldoStripe['source'],
+            ]
+        ));
     }
 
     public function update(Request $request)
@@ -161,6 +177,57 @@ class UserPerfilController extends Controller
             'nombre' => $usuario->nombre,
             'inventario' => $inventario
         ]);
+    }
+
+    private function obtenerSaldoDisponibleStripe(User $usuario): array
+    {
+        $saldoLocal = (float) ($usuario->amount ?? 0);
+
+        if (empty($usuario->stripe_account_id) || empty(config('services.stripe.secret'))) {
+            return [
+                'amount' => round($saldoLocal, 2),
+                'amount_in_cents' => (int) round($saldoLocal * 100),
+                'currency' => 'usd',
+                'source' => 'local',
+            ];
+        }
+
+        try {
+            Stripe::setApiKey(config('services.stripe.secret'));
+
+            $balance = Balance::retrieve([], [
+                'stripe_account' => $usuario->stripe_account_id,
+            ]);
+
+            $balancesDisponibles = collect($balance->available ?? []);
+            $saldoPreferido = $balancesDisponibles->firstWhere('currency', 'usd')
+                ?? $balancesDisponibles->firstWhere('currency', 'eur')
+                ?? $balancesDisponibles->first();
+
+            if (!$saldoPreferido) {
+                return [
+                    'amount' => 0.0,
+                    'amount_in_cents' => 0,
+                    'currency' => 'usd',
+                    'source' => 'stripe',
+                ];
+            }
+
+            return [
+                'amount' => round($saldoPreferido->amount / 100, 2),
+                'amount_in_cents' => (int) $saldoPreferido->amount,
+                'currency' => strtolower($saldoPreferido->currency),
+                'source' => 'stripe',
+            ];
+        } catch (ApiErrorException $e) {
+            return [
+                'amount' => round($saldoLocal, 2),
+                'amount_in_cents' => (int) round($saldoLocal * 100),
+                'currency' => 'usd',
+                'source' => 'local_fallback',
+                'stripe_error' => $e->getMessage(),
+            ];
+        }
     }
 }
 
