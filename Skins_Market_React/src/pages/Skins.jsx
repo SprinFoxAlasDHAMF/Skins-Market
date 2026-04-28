@@ -26,6 +26,7 @@ function Skins() {
     color: "",
     precio_min: "",
     precio_max: "",
+    tiene_pegatinas: "", // 👈 NUEVO
   });
   const mostrarSoloPegatinas = modoPegatina !== "";
   // Verifica login y trae filtros
@@ -154,6 +155,18 @@ function Skins() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
+        </div>
+        <div className="filter-group">
+          <label>Pegatinas</label>
+          <select
+            name="tiene_pegatinas"
+            value={filters.tiene_pegatinas}
+            onChange={handleChange}
+          >
+            <option value="">Todas</option>
+            <option value="1">Con pegatinas</option>
+            <option value="0">Sin pegatinas</option>
+          </select>
         </div>
         <div className="filter-group">
           <label>Modo de Pegatina</label>

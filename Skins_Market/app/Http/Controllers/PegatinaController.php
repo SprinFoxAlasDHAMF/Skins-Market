@@ -39,6 +39,7 @@ class PegatinaController extends Controller
         if ($request->filled('modo_pegatina_id')) {
             $query->where('pegatina.modo_pegatina_id', $request->modo_pegatina_id);
         }
+        
 
         return response()->json($query->get());
     }

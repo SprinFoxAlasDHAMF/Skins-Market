@@ -14,6 +14,7 @@ class SkinController extends Controller
 {
     public function index(Request $request)
     {
+
         $query = Item::with(['calidad', 'armas.exterior', 'armas.categoria', 'color']);
 
         if ($request->filled('nombre')) {
@@ -51,7 +52,16 @@ class SkinController extends Controller
                 $q->where('exterior_id', $request->exterior_id)
             );
         }
+        if ($request->filled('tiene_pegatinas')) {
 
+            if ($request->tiene_pegatinas == "1") {
+                $query->whereHas('armas.pegatinas');
+            }
+
+            if ($request->tiene_pegatinas == "0") {
+                $query->whereDoesntHave('armas.pegatinas');
+            }
+        }
         $items = $query->get()->map(function ($item) {
             $arma = $item->armas->first();
         
