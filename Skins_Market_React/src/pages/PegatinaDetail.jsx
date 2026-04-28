@@ -55,7 +55,7 @@ function PegatinaDetail() {
 
           <p>
             <strong>Modo:</strong>{" "}
-            {pegatina.modoPegatina?.nombre ?? "N/A"}
+            {pegatina.modo ?? "N/A"}
           </p>
 
           <button onClick={() => navigate("/skins")}>

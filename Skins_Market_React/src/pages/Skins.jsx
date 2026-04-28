@@ -27,7 +27,7 @@ function Skins() {
     precio_min: "",
     precio_max: "",
   });
-
+  const mostrarSoloPegatinas = modoPegatina !== "";
   // Verifica login y trae filtros
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -47,6 +47,8 @@ function Skins() {
       .catch(err => console.error(err));
   }, [navigate]);
 
+
+
   // Traer skins con filtros
   const fetchSkins = () => {
     setLoading(true);
@@ -59,13 +61,24 @@ function Skins() {
   useEffect(() => {
     api.get("/pegatinas", {
       params: {
-        modo_pegatina_id: modoPegatina
+        modo_pegatina_id: modoPegatina || undefined
       }
     })
       .then(res => setPegatinas(res.data))
       .catch(err => console.error(err));
   }, [modoPegatina]);
-
+  useEffect(() => {
+    api.get("/pegatinas", {
+      params: {
+        nombre: search,
+        precio_min: filters.precio_min,
+        precio_max: filters.precio_max,
+        modo_pegatina_id: modoPegatina || undefined
+      }
+    })
+      .then(res => setPegatinas(res.data))
+      .catch(err => console.error(err));
+  }, [search, filters.precio_min, filters.precio_max, modoPegatina]);
   useEffect(() => {
     fetchSkins();
   }, [filters]);
@@ -221,8 +234,8 @@ function Skins() {
           {!loading && skins.length === 0 && <p className="no-results-text">No se encontraron skins</p>}
 
           <div className="skins-grid">
-            {!loading && skins.map(skin => (
-              <div key={skin.id} className="skin-card">
+              {!mostrarSoloPegatinas && skins.map(skin => (
+                <div key={skin.id} className="skin-card">
                 <img
                   src={`http://localhost:8000/${skin.foto}`}
                   alt={skin.nombre}
@@ -255,41 +268,45 @@ function Skins() {
               </div>
             ))}
             {/* PEGATINAS */}
-<div className="skins-results">
-  <h4>Pegatinas Disponibles</h4>
+            <div className="skins-results">
+              <h4>Pegatinas Disponibles</h4>
 
-  {pegatinas.length === 0 && <p className="no-results-text">No hay pegatinas</p>}
+              {pegatinas.length === 0 && (
+                <p className="no-results-text">No hay pegatinas</p>
+              )}
 
-  <div className="skins-grid">
-    {pegatinas.map(p => (
-      <div key={p.id} className="skin-card">
-        <img
-          src={`http://localhost:8000/${p.imagen}`}
-          alt={p.nombre}
-          onError={(e) =>
-            (e.target.src = "https://via.placeholder.com/280x280?text=Sin+imagen")
-          }
-        />
+              <div className="skins-grid">
+                {pegatinas.map(p => (
+                  <div key={p.id} className="skin-card">
+                    <img
+                      src={`http://localhost:8000/${p.imagen}`}
+                      alt={p.nombre}
+                      onError={(e) =>
+                        (e.target.src = "https://via.placeholder.com/280x280?text=Sin+imagen")
+                      }
+                    />
 
-        <div className="skin-card-body">
-          <h5>{p.nombre}</h5>
-          <p><strong>${p.precio}</strong></p>
-          <p>
-            <span>Modo:</span>{" "}
-            <strong>{p.modo?.nombre || "Normal"}</strong>
-          </p>
-          <button
-            className="btn-view-details"
-            onClick={() => navigate(`/pegatinas/${p.id}`)}
-          >
-            Ver Detalles
-          </button>
-        </div>
-      </div>
-    ))}
-  </div>
-</div>
+                    <div className="skin-card-body">
+                      <h5>{p.nombre}</h5>
+                      <p><strong>${p.precio}</strong></p>
+                      <p>
+                        <span>Modo:</span>{" "}
+                        <strong>{p.modo || "Normal"}</strong>
+                      </p>
+
+                      <button
+                        className="btn-view-details"
+                        onClick={() => navigate(`/pegatinas/${p.id}`)}
+                      >
+                        Ver Detalles
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
+
         </div>
         
       </div>
