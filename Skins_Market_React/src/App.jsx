@@ -7,21 +7,31 @@ import AdminForm from "./pages/AdminForm";
 import UserPerfil from "./pages/UserPerfil";
 import Favoritos from "./pages/Favoritos";
 import Recargar from "./pages/Recargar";
+import PegatinaDetail from "./pages/PegatinaDetail";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+
         <Route path="/" element={<Navigate to="/login" />} />
+
         <Route path="/skins" element={<Skins />} />
         <Route path="/skins/:id" element={<SkinDetail />} />
+
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/perfil" element={<UserPerfil />} />
         <Route path="/favoritos" element={<Favoritos />} />
+
         <Route path="/admin/skins/new" element={<AdminForm />} />
         <Route path="/admin/skins/:id/edit" element={<AdminForm />} />
+
         <Route path="/recargar" element={<Recargar />} />
+
+        {/* 🔥 SOLO ESTA */}
+        <Route path="/pegatinas/:id" element={<PegatinaDetail />} />
+
       </Routes>
     </BrowserRouter>
   );

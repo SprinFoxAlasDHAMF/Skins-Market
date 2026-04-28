@@ -4,11 +4,15 @@ import api from "../api/api";
 import { isLoggedIn, logout, isAdmin } from "../utils/auth";
 import "../styles/Skins.css";
 
+
 function Skins() {
   const navigate = useNavigate();
   const [skins, setSkins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [pegatinas, setPegatinas] = useState([]);
+  const [modosPegatinas, setModosPegatinas] = useState([]);
+  const [modoPegatina, setModoPegatina] = useState("");
   // Filtros
   const [calidades, setCalidades] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -22,15 +26,18 @@ function Skins() {
     color: "",
     precio_min: "",
     precio_max: "",
+    tiene_pegatinas: "", // 👈 NUEVO
   });
-
+  const mostrarSoloPegatinas = modoPegatina !== "";
   // Verifica login y trae filtros
   useEffect(() => {
     if (!isLoggedIn()) {
       navigate("/login");
       return;
     }
-
+    api.get("/modos-pegatinas")
+    .then(res => setModosPegatinas(res.data))
+    .catch(err => console.error(err));
     api.get("/filters")
       .then(res => {
         setCalidades(res.data.calidades);
@@ -41,6 +48,8 @@ function Skins() {
       .catch(err => console.error(err));
   }, [navigate]);
 
+
+
   // Traer skins con filtros
   const fetchSkins = () => {
     setLoading(true);
@@ -50,6 +59,27 @@ function Skins() {
       .finally(() => setLoading(false));
   };
 
+  useEffect(() => {
+    api.get("/pegatinas", {
+      params: {
+        modo_pegatina_id: modoPegatina || undefined
+      }
+    })
+      .then(res => setPegatinas(res.data))
+      .catch(err => console.error(err));
+  }, [modoPegatina]);
+  useEffect(() => {
+    api.get("/pegatinas", {
+      params: {
+        nombre: search,
+        precio_min: filters.precio_min,
+        precio_max: filters.precio_max,
+        modo_pegatina_id: modoPegatina || undefined
+      }
+    })
+      .then(res => setPegatinas(res.data))
+      .catch(err => console.error(err));
+  }, [search, filters.precio_min, filters.precio_max, modoPegatina]);
   useEffect(() => {
     fetchSkins();
   }, [filters]);
@@ -70,6 +100,9 @@ function Skins() {
   };
   const handleReset = () => {
     setSearch("");
+    setModoPegatina("");   // 🔥 IMPORTANTE
+    setPegatinas([]);      // 🔥 limpia cache
+
     setFilters({
       calidad_id: "",
       tipo: "",
@@ -122,6 +155,34 @@ function Skins() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
+        </div>
+        <div className="filter-group">
+          <label>Pegatinas</label>
+          <select
+            name="tiene_pegatinas"
+            value={filters.tiene_pegatinas}
+            onChange={handleChange}
+          >
+            <option value="">Todas</option>
+            <option value="1">Con pegatinas</option>
+            <option value="0">Sin pegatinas</option>
+          </select>
+        </div>
+        <div className="filter-group">
+          <label>Modo de Pegatina</label>
+
+          <select
+            value={modoPegatina}
+            onChange={(e) => setModoPegatina(e.target.value)}
+          >
+            <option value="">Todos</option>
+
+            {modosPegatinas.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.nombre}
+              </option>
+            ))}
+          </select>
         </div>
           <form onSubmit={handleSubmit}>
             <div className="filter-group">
@@ -186,8 +247,8 @@ function Skins() {
           {!loading && skins.length === 0 && <p className="no-results-text">No se encontraron skins</p>}
 
           <div className="skins-grid">
-            {!loading && skins.map(skin => (
-              <div key={skin.id} className="skin-card">
+              {!mostrarSoloPegatinas && skins.map(skin => (
+                <div key={skin.id} className="skin-card">
                 <img
                   src={`http://localhost:8000/${skin.foto}`}
                   alt={skin.nombre}
@@ -219,8 +280,48 @@ function Skins() {
                 </div>
               </div>
             ))}
+            {/* PEGATINAS */}
+            <div className="skins-results">
+              <h4>Pegatinas Disponibles</h4>
+
+              {pegatinas.length === 0 && (
+                <p className="no-results-text">No hay pegatinas</p>
+              )}
+
+              <div className="skins-grid">
+                {pegatinas.map(p => (
+                  <div key={p.id} className="skin-card">
+                    <img
+                      src={`http://localhost:8000/${p.imagen}`}
+                      alt={p.nombre}
+                      onError={(e) =>
+                        (e.target.src = "https://via.placeholder.com/280x280?text=Sin+imagen")
+                      }
+                    />
+
+                    <div className="skin-card-body">
+                      <h5>{p.nombre}</h5>
+                      <p><strong>${p.precio}</strong></p>
+                      <p>
+                        <span>Modo:</span>{" "}
+                        <strong>{p.modo || "Normal"}</strong>
+                      </p>
+
+                      <button
+                        className="btn-view-details"
+                        onClick={() => navigate(`/pegatinas/${p.id}`)}
+                      >
+                        Ver Detalles
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
+
         </div>
+        
       </div>
     </div>
   );

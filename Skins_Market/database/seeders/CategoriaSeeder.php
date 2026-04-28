@@ -9,6 +9,7 @@ class CategoriaSeeder extends Seeder
 {
     public function run()
     {
+        Categoria::create(['nombre' => 'Pistolas']);
         Categoria::create(['nombre' => 'Rifles']);
         Categoria::create(['nombre' => 'Francotiradores']);
         Categoria::create(['nombre' => 'Subfusiles']);

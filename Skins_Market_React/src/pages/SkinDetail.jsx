@@ -105,15 +105,34 @@ function SkinDetail() {
             </div>
 
             {firstArma?.pegatinas?.length > 0 && (
-              <div className="skin-pegatinas">
-                <h5>Pegatinas:</h5>
-                <div>
-                  {firstArma.pegatinas.map((p, i) => (
-                    <span key={i} className="pegatina-badge">{p.modoPegatina.nombre}</span>
-                  ))}
-                </div>
-              </div>
-            )}
+  <div className="skin-pegatinas">
+    <h5>Pegatinas:</h5>
+
+    <div className="pegatinas-grid">
+      {firstArma.pegatinas.map((p) => (
+        <div
+          key={p.id}
+          className="pegatina-item clickable"
+          onClick={() => navigate(`/pegatinas/${p.id}`)}
+        >
+          <img
+            src={
+              p.imagen
+                ? `http://localhost:8000/${p.imagen}`
+                : "https://via.placeholder.com/60"
+            }
+            alt={p.modoPegatina?.nombre || "pegatina"}
+            onError={(e) => {
+              e.target.src = "https://via.placeholder.com/60";
+            }}
+          />
+
+          <small>{p.modoPegatina?.nombre}</small>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
           </div>
         </div>
       </div>

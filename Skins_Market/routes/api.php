@@ -11,6 +11,7 @@ use App\Http\Controllers\FilterController;
 use App\Http\Controllers\Admin\ItemAdminController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\CarritoController; 
+use App\Http\Controllers\PegatinaController;
 /*
 |--------------------------------------------------------------------------
 | AUTH
@@ -58,7 +59,21 @@ Route::get('/filters', [FilterController::class, 'getFilters']);
 | ADMIN
 |--------------------------------------------------------------------------
 */
-
+Route::get('/pegatinas', [PegatinaController::class, 'index']);
+Route::get('/modos-pegatinas', [PegatinaController::class, 'modos']);
+Route::get('/pegatinas/{id}', function ($id) {
+    return DB::table('pegatina')
+        ->join('modo_pegatina', 'pegatina.modo_pegatina_id', '=', 'modo_pegatina.id')
+        ->select(
+            'pegatina.id',
+            'pegatina.nombre',
+            'pegatina.precio',
+            'pegatina.imagen',
+            'modo_pegatina.nombre as modo'
+        )
+        ->where('pegatina.id', $id)
+        ->first();
+});
 Route::prefix('admin')->group(function () {
     Route::get('/skins/{id}', [ItemAdminController::class, 'show']);      // Obtener item
     Route::post('/skins', [ItemAdminController::class, 'store']);         // Crear item
