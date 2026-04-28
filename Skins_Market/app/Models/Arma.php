@@ -15,7 +15,11 @@ class Arma extends Model
     use HasFactory;
 
     protected $table = 'arma';
-    protected $fillable = ['categoria_id'];
+    protected $fillable = [
+        'item_id',
+        'categoria_id',
+        'exterior_id',
+    ];
     public function item()
     {
         return $this->belongsTo(Item::class, 'item_id', 'id');

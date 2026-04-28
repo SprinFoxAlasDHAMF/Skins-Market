@@ -12,7 +12,9 @@ class User extends Authenticatable implements FilamentUser
     use HasApiTokens, Notifiable;
     // Define la tabla explícitamente si es necesario
     protected $table = 'users';
+    public $timestamps = true;
 
+    protected $rememberTokenName = null;
     protected $fillable = [
         'nombre',
         'email',
@@ -43,17 +45,28 @@ class User extends Authenticatable implements FilamentUser
      */
     public function canAccessFilament(): bool
     {
-        return $this->rol == 'admin';  // Asegúrate de que el rol sea 'admin'
+        return $this->role == 'admin';  // Asegúrate de que el rol sea 'admin'
     }
 
     /**
      * Devuelve el nombre que Filament mostrará
      */
+    
     public function getFilamentName(): string
     {
-        return $this->nombre ?: 'Administrador';  // El nombre del usuario
+        return (string) ($this->nombre ?? 'Administrador');
+    }
+    
+    public function getEmailForPasswordReset(): string
+    {
+        return $this->email;
     }
 
+    public function getNameAttribute()
+    {
+        return $this->nombre;
+    }
+    
     /**
      * Opcional: devuelve la foto de perfil para Filament
      */

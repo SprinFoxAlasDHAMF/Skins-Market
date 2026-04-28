@@ -1,92 +1,180 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
-
-use Illuminate\Http\Request;
-use Stripe\Stripe;
-use Stripe\PaymentIntent;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Stripe\Exception\ApiErrorException;
+use Stripe\PaymentIntent;
+use Stripe\Stripe;
 use Stripe\Transfer;
+
 class StripeController extends Controller
 {
     public function depositar(Request $request)
     {
-        // Validar la solicitud
         $request->validate([
-            'amount' => 'required|numeric|min:1',  // Mínimo 1 unidad de dinero
+            'amount' => 'required|numeric|min:1',
         ]);
 
-
-        // Obtener el usuario autenticado
         $user = auth()->user();
 
+        if (!$user) {
+            return response()->json([
+                'message' => 'Usuario no autenticado.',
+            ], 401);
+        }
 
-        // Configurar Stripe con tu clave secreta
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        $stripeSecret = config('services.stripe.secret');
 
+        if (empty($stripeSecret)) {
+            return response()->json([
+                'message' => 'La clave secreta de Stripe no esta configurada en el servidor.',
+            ], 500);
+        }
 
-        // Crear el PaymentIntent para el depósito
-        $paymentIntent = PaymentIntent::create([
-            'amount' => $request->amount * 100,  // Convertir a centavos
-            'currency' => 'usd',  // O la moneda que prefieras
-            'metadata' => [
-                'usuario_id' => auth()->id() ?? 1,
-            ],
-        ]);
+        try {
+            Stripe::setApiKey($stripeSecret);
 
+            $amountInCents = (int) round(((float) $request->amount) * 100);
 
-        return response()->json([
-            'clientSecret' => $paymentIntent->client_secret,
-        ]);
+            $paymentIntent = PaymentIntent::create([
+                'amount' => $amountInCents,
+                'currency' => 'eur',
+                'metadata' => [
+                    'usuario_id' => (string) $user->id,
+                ],
+            ]);
+
+            return response()->json([
+                'clientSecret' => $paymentIntent->client_secret,
+            ]);
+        } catch (ApiErrorException $e) {
+            Log::error('Error al crear PaymentIntent de Stripe', [
+                'user_id' => $user->id,
+                'amount' => $request->amount,
+                'stripe_error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'No se pudo contactar con Stripe desde el servidor. Revisa la conexion saliente del backend.',
+                'error' => $e->getMessage(),
+            ], 502);
+        } catch (\Throwable $e) {
+            Log::error('Error inesperado al iniciar un deposito', [
+                'user_id' => $user->id,
+                'amount' => $request->amount,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'Ocurrio un error inesperado al iniciar el pago.',
+            ], 500);
+        }
     }
 
+    public function confirmarDeposito(Request $request)
+    {
+        $request->validate([
+            'payment_intent_id' => 'required|string',
+        ]);
+
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Usuario no autenticado.',
+            ], 401);
+        }
+
+        $stripeSecret = config('services.stripe.secret');
+
+        if (empty($stripeSecret)) {
+            return response()->json([
+                'message' => 'La clave secreta de Stripe no esta configurada en el servidor.',
+            ], 500);
+        }
+
+        try {
+            Stripe::setApiKey($stripeSecret);
+
+            $paymentIntent = PaymentIntent::retrieve($request->payment_intent_id);
+
+            if ($paymentIntent->status !== 'succeeded') {
+                return response()->json([
+                    'message' => 'El pago no ha sido completado.',
+                ], 400);
+            }
+
+            if ((string) ($paymentIntent->metadata->usuario_id ?? '') !== (string) $user->id) {
+                return response()->json([
+                    'message' => 'El pago no pertenece al usuario autenticado.',
+                ], 403);
+            }
+
+            $monto = $paymentIntent->amount / 100;
+            $user->amount = ($user->amount ?? 0) + $monto;
+            $user->save();
+
+            return response()->json([
+                'message' => 'Deposito confirmado.',
+                'nuevo_saldo' => $user->amount,
+            ]);
+        } catch (ApiErrorException $e) {
+            Log::error('Error de Stripe al confirmar deposito', [
+                'user_id' => $user->id,
+                'payment_intent_id' => $request->payment_intent_id,
+                'stripe_error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'No se pudo verificar el pago con Stripe desde el servidor.',
+                'error' => $e->getMessage(),
+            ], 502);
+        } catch (\Throwable $e) {
+            Log::error('Error inesperado al confirmar deposito', [
+                'user_id' => $user->id,
+                'payment_intent_id' => $request->payment_intent_id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'Error al confirmar el deposito.',
+            ], 500);
+        }
+    }
 
     public function retirar(Request $request)
     {
-        // Validar la solicitud
         $request->validate([
-            'amount' => 'required|numeric|min:1',  // Mínimo 1 unidad de dinero
+            'amount' => 'required|numeric|min:1',
         ]);
 
-
-        // Obtener el usuario autenticado
         $user = auth()->user();
 
-
-        // Validar que el usuario tenga suficiente saldo
         if ($user->balance < $request->amount) {
             return response()->json(['message' => 'Saldo insuficiente'], 400);
         }
 
-
-        // Configurar Stripe con tu clave secreta
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
-
-        // Verificar si el usuario tiene una cuenta Stripe conectada
         if (!$user->stripe_account_id) {
             return response()->json(['message' => 'Cuenta de Stripe no conectada'], 400);
         }
 
-
-        // Crear un Transfer (retirar dinero de Stripe Connect a la cuenta bancaria del usuario)
         try {
             $transfer = Transfer::create([
-                'amount' => $request->amount * 100,  // Convertir a centavos
-                'currency' => 'usd',  // Puedes modificar esto según la moneda
-                'destination' => $user->stripe_account_id,  // Cuenta conectada de Stripe
+                'amount' => $request->amount * 100,
+                'currency' => 'usd',
+                'destination' => $user->stripe_account_id,
             ]);
 
-
-            // Actualizar el saldo del usuario
             $user->balance -= $request->amount;
             $user->save();
-
 
             return response()->json([
                 'message' => 'Retiro exitoso',
@@ -96,72 +184,54 @@ class StripeController extends Controller
             return response()->json(['message' => 'Error al procesar el retiro', 'error' => $e->getMessage()], 500);
         }
     }
-   
+
     public function conectarCuentaStripe(Request $request)
     {
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
-
-        // Redirigir al usuario a Stripe para completar la conexión
         $accountLink = \Stripe\AccountLink::create([
-            'account' => $request->user()->stripe_account_id, // ID de la cuenta conectada de Stripe
-            'refresh_url' => route('stripe.account_refresh'),  // URL para refrescar en caso de error
-            'return_url' => route('stripe.account_return'),  // URL de retorno después de la conexión exitosa
-            'type' => 'account_onboarding', // Tipo de enlace
+            'account' => $request->user()->stripe_account_id,
+            'refresh_url' => route('stripe.account_refresh'),
+            'return_url' => route('stripe.account_return'),
+            'type' => 'account_onboarding',
         ]);
-
 
         return redirect($accountLink->url);
     }
-
 
     public function confirmarCompra(Request $request)
     {
         $user = auth()->user();
 
-
         return DB::transaction(function () use ($user) {
-
-
-            // 1. Obtener carrito del usuario
             $carrito = DB::table('carrito')
                 ->where('usuario_id', $user->id)
                 ->get();
 
-
             if ($carrito->isEmpty()) {
                 return response()->json([
-                    'message' => 'El carrito está vacío'
+                    'message' => 'El carrito esta vacio'
                 ], 400);
             }
 
-
-            // 2. Obtener info de items
             $items = DB::table('item')
                 ->whereIn('id', $carrito->pluck('item_id'))
                 ->get()
                 ->keyBy('id');
 
-
-            // 3. Calcular total REAL
             $total = 0;
-
 
             foreach ($carrito as $c) {
                 $precio = $items[$c->item_id]->precio;
                 $total += $precio * $c->cantidad;
             }
 
-
-            // 4. Verificar saldo
             if ($user->dinero < $total) {
                 return response()->json([
                     'message' => 'Saldo insuficiente'
                 ], 400);
             }
 
-
-            // 5. Crear factura
             $facturaId = DB::table('factura')->insertGetId([
                 'usuario_id' => $user->id,
                 'fecha' => Carbon::now(),
@@ -170,17 +240,11 @@ class StripeController extends Controller
                 'estado' => 'pagado',
             ]);
 
-
-            // 6. Crear detalles + tokens
             foreach ($carrito as $c) {
-
-
                 $item = $items[$c->item_id];
                 $subtotal = $item->precio * $c->cantidad;
 
-
-                // factura_detalle
-                $detalleId = DB::table('factura_detalle')->insertGetId([
+                DB::table('factura_detalle')->insertGetId([
                     'factura_id' => $facturaId,
                     'item_id' => $item->id,
                     'cantidad' => $c->cantidad,
@@ -188,11 +252,7 @@ class StripeController extends Controller
                     'subtotal' => $subtotal,
                 ]);
 
-
-                // generar tokens (uno por unidad)
                 for ($i = 0; $i < $c->cantidad; $i++) {
-
-
                     DB::table('token')->insert([
                         'factura_id' => $facturaId,
                         'item_id' => $item->id,
@@ -202,20 +262,15 @@ class StripeController extends Controller
                 }
             }
 
-
-            // 7. Restar saldo
             DB::table('usuarios')
                 ->where('id', $user->id)
                 ->update([
                     'dinero' => $user->dinero - $total
                 ]);
 
-
-            // 8. Vaciar carrito
             DB::table('carrito')
                 ->where('usuario_id', $user->id)
                 ->delete();
-
 
             return response()->json([
                 'message' => 'Compra realizada correctamente',

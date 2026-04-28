@@ -8,7 +8,7 @@ function Skins() {
   const navigate = useNavigate();
   const [skins, setSkins] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [search, setSearch] = useState("");
   // Filtros
   const [calidades, setCalidades] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -52,8 +52,15 @@ function Skins() {
 
   useEffect(() => {
     fetchSkins();
-  }, []); // al cargar la página
+  }, [filters]);
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setFilters(prev => ({ ...prev, nombre: search }));
+    }, 300);
 
+    return () => clearTimeout(delay);
+  }, [search]);
+  
   // Manejar cambio en filtros
   const handleChange = (e) => setFilters({ ...filters, [e.target.name]: e.target.value });
 
@@ -61,8 +68,19 @@ function Skins() {
     e.preventDefault();
     fetchSkins();
   };
-
-  // Borrar skin (solo admin)
+  const handleReset = () => {
+    setSearch("");
+    setFilters({
+      calidad_id: "",
+      tipo: "",
+      categoria_id: "",
+      exterior_id: "",
+      color: "",
+      precio_min: "",
+      precio_max: "",
+    });
+  };
+    // Borrar skin (solo admin)
   const handleDelete = (id) => {
     if (!window.confirm("¿Estás seguro de que quieres borrar esta skin?")) return;
 
@@ -93,8 +111,18 @@ function Skins() {
 
       <div className="skins-content">
         {/* FILTROS */}
+        
         <div className="skins-filters">
           <h4>Filtros</h4>
+          <div className="filter-group">
+            <label>Buscar por nombre</label>
+            <input
+              type="text"
+              placeholder="Escribe el nombre de la skin"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+        </div>
           <form onSubmit={handleSubmit}>
             <div className="filter-group">
               <label>Calidad</label>
@@ -147,8 +175,7 @@ function Skins() {
               <label>Precio máximo</label>
               <input type="number" name="precio_max" value={filters.precio_max} onChange={handleChange} placeholder="$9999"/>
             </div>
-
-            <button type="submit" className="btn-apply-filters">Aplicar Filtros</button>
+            <button type="button" className="btn-apply-filters" onClick={handleReset}>Resetear Filtros</button>
           </form>
         </div>
 

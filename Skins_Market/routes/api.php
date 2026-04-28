@@ -83,6 +83,7 @@ Route::middleware('auth:sanctum')->get('/usuario/inventario', [UserPerfilControl
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/depositar', [StripeController::class, 'depositar']);
+    Route::post('/confirmar-deposito', [StripeController::class, 'confirmarDeposito']);
     Route::get('/carrito', [CarritoController::class, 'index']);
     Route::post('/carrito', [CarritoController::class, 'agregar']);
     Route::put('/carrito/{item_id}', [CarritoController::class, 'actualizar']);
