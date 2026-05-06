@@ -10,7 +10,7 @@ class Item extends Model
     use HasFactory;
 
     protected $table = 'item';
-    protected $fillable = ['nombre', 'precio', 'foto', 'calidad_id', 'tipo', 'categoria_id', 'exterior_id', 'color_id'];
+    protected $fillable = ['nombre', 'precio', 'foto','modelo_3d', 'calidad_id', 'tipo', 'categoria_id', 'exterior_id', 'color_id'];
 
     // Relación con calidad
     public function calidad()

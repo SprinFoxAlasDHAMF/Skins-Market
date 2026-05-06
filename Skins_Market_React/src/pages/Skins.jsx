@@ -10,6 +10,7 @@ function Skins() {
   const [skins, setSkins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [pegatinas, setPegatinas] = useState([]);
   const [modosPegatinas, setModosPegatinas] = useState([]);
   const [modoPegatina, setModoPegatina] = useState("");
@@ -93,7 +94,14 @@ function Skins() {
   
   // Manejar cambio en filtros
   const handleChange = (e) => setFilters({ ...filters, [e.target.name]: e.target.value });
-
+  useEffect(() => {
+    // Esto asegura que el fondo de la página completa cambie, no solo el div
+    if (!isDarkMode) {
+      document.body.style.backgroundColor = "#ffffff";
+    } else {
+      document.body.style.backgroundColor = "#040405"; // Tu color oscuro original
+    }
+  }, [isDarkMode]);
   const handleSubmit = (e) => {
     e.preventDefault();
     fetchSkins();
@@ -125,10 +133,16 @@ function Skins() {
   };
 
   return (
-    <div className="skins-container">
+    <div className={`skins-container ${!isDarkMode ? "light-theme" : ""}`}>
       <div className="skins-header">
         <h1>Skins CS:GO</h1>
         <div className="skins-header-actions">
+          <button 
+            className="btn-custom btn-theme-toggle" 
+            onClick={() => setIsDarkMode(!isDarkMode)}
+          >
+            {isDarkMode ? "☀️ Modo Claro" : "🌙 Modo Oscuro"}
+          </button>
           <button className="btn-custom btn-secondary-custom" onClick={logout}>Logout</button>
           <button className="btn-custom btn-secondary-custom" onClick={() => navigate("/perfil")}>Mi Perfil</button>
           {!isAdmin() && (
@@ -252,7 +266,14 @@ function Skins() {
                 <img
                   src={`http://localhost:8000/${skin.foto}`}
                   alt={skin.nombre}
-                  onError={(e) => e.target.src = 'https://via.placeholder.com/280x280?text=Sin+imagen'}
+                  onError={(e) => {
+                    // Si ya intentamos poner el placeholder y volvió a fallar, 
+                    // evitamos que siga intentándolo infinitamente
+                    if (e.target.src !== 'https://placehold.co/280x280?text=Sin+Imagen') {
+                      e.target.onerror = null; 
+                      e.target.src = 'https://placehold.co/280x280?text=Sin+Imagen';
+                    }
+                  }}
                 />
                 <div className="skin-card-body">
                   <h5>{skin.nombre}</h5>

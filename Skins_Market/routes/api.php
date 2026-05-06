@@ -17,7 +17,26 @@ use App\Http\Controllers\PegatinaController;
 | AUTH
 |--------------------------------------------------------------------------
 */
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Response;
 
+Route::get('/modelos/{filename}', function ($filename) {
+    $path = public_path('modelos/' . $filename);
+
+    if (!File::exists($path)) {
+        return response()->json(['error' => 'Archivo no encontrado'], 404);
+    }
+
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+    // Esto fuerza el permiso de lectura desde tu React
+    $response->header("Access-Control-Allow-Origin", "http://localhost:5173"); 
+    
+    return $response;
+});
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/login', [LoginController::class, 'login']);
 

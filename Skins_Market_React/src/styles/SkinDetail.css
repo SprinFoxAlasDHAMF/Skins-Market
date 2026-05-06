@@ -8,7 +8,22 @@
   background: radial-gradient(circle at top, #1b1b1f 0%, #0c0c12 45%, #040405 100%);
   color: #e6e9f0;
 }
+.skin-detail-image {
+  position: relative;
+}
 
+.btn-3d {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  padding: 8px 12px;
+  background-color: #ff5722;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 10;
+}
 .skin-detail-header {
   display: flex;
   align-items: center;

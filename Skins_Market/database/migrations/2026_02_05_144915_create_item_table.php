@@ -15,7 +15,7 @@ return new class extends Migration
 
             $table->decimal('precio', 10, 2);
             $table->string('foto')->nullable();
-            
+            $table->string('modelo_3d')->nullable();
             // Relaciones
             $table->foreignId('calidad_id')->constrained('calidad');
             $table->foreignId('categoria_id')->constrained('categoria');

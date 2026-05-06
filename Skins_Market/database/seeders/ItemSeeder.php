@@ -50,7 +50,7 @@ class ItemSeeder extends Seeder
         // 🎯 SNIPERS
         // ======================================================
         $snipers = [
-            ['nombre'=>'AWP | Dragon Lore','color'=>'amarillo','precio'=>5000,'foto'=>'items/armas/AWP_Dragon_Lore-Factory_new.png','exterior_id'=>1],
+            ['nombre'=>'AWP | Dragon Lore','color'=>'amarillo','precio'=>5000,'foto'=>'items/armas/AWP_Dragon_Lore-Factory_new.png', 'modelo_3d'=>'modelos/csgo_awp_dragon_lore.glb', 'exterior_id'=>1],
             ['nombre'=>'AWP | Asiimov','color'=>'blanco','precio'=>400,'foto'=>'items/armas/AWP_Asiimov-Factory_new.png','exterior_id'=>1],
             ['nombre'=>'AWP | Neo-Noir','color'=>'morado','precio'=>150,'foto'=>'items/armas/AWP_Neo_Noir-Factory_new.png','exterior_id'=>1],
             ['nombre'=>'SSG 08 | Blood in the Water','color'=>'rojo','precio'=>80,'foto'=>'items/armas/SSG_08_Blood_in_the_Water_factory_new.png','exterior_id'=>1],
@@ -62,8 +62,10 @@ class ItemSeeder extends Seeder
         $smg = [
             ['nombre'=>'MAC-10 | Neon Rider','color'=>'morado','precio'=>20,'foto'=>'items/armas/MAC-10_Neon_Rider_factory_new.png','exterior_id'=>1],
             ['nombre'=>'MP7 | Bloodsport','color'=>'rojo','precio'=>35,'foto'=>'items/armas/MP7_Bloodsport_factory_new.png','exterior_id'=>1],
-            ['nombre'=>'P90 | Death by Kitty','color'=>'morado','precio'=>70,'foto'=>'items/armas/P90_Death_by_Kitty_factory_new','exterior_id'=>1],
+            ['nombre'=>'P90 | Death by Kitty','color'=>'morado','precio'=>70,'foto'=>'items/armas/P90_Death_by_Kitty_factory_new.png','exterior_id'=>1],
             ['nombre'=>'UMP-45 | Primal Saber','color'=>'amarillo','precio'=>25,'foto'=>'items/armas/UMP-45_Primal_Saber_factory_new.png','exterior_id'=>1],
+            ['nombre'=>'MP7 | skulls','color'=>'negro','precio'=>40,'foto'=>'items/armas/mp7__skulls_factory_new.png','modelo_3d'=>'modelos/mp7__skulls_perfect_world_edition.glb','exterior_id'=>1],
+
         ];
 
         // ======================================================
@@ -87,7 +89,7 @@ class ItemSeeder extends Seeder
 
         $cuchillos = [
             ['nombre'=>'Karambit | Doppler','color'=>'morado','precio'=>2500,'foto'=>'items/cuchillos/Karambit_Doppler_Factory_New.png','exterior_id'=>1],
-            ['nombre'=>'Karambit | Fade','color'=>'morado','precio'=>3000,'foto'=>'items/cuchillos/Karambit_Fade_Factory_New.png','exterior_id'=>1],
+            ['nombre'=>'Karambit | Fade','color'=>'morado','precio'=>3000,'foto'=>'items/cuchillos/Karambit_Fade_Factory_New.png', 'modelo_3d'=>'modelos/karambit_fade.glb','exterior_id'=>1],
             ['nombre'=>'M9 Bayonet | Crimson Web','color'=>'rojo','precio'=>1800,'foto'=>'items/cuchillos/M9_Bayonet_Crimson_Web_Factory_New.png','exterior_id'=>1],
             ['nombre'=>'Bayonet | Marble Fade','color'=>'amarillo','precio'=>1200,'foto'=>'items/cuchillos/Bayonet_Marble_Fade_Factory_New.png','exterior_id'=>1],
             ['nombre'=>'Butterfly Knife | Slaughter','color'=>'rojo','precio'=>3500,'foto'=>'items/cuchillos/Butterfly_Knife_Slaughter_Factory_New.png','exterior_id'=>1],
@@ -129,6 +131,7 @@ class ItemSeeder extends Seeder
                     'nombre' => $i['nombre'],
                     'precio' => $i['precio'],
                     'foto' => $i['foto'],
+                    'modelo_3d'    => $i['modelo_3d'] ?? null,
                     'tipo' => $tipo,
                     'calidad_id' => $getCalidad('Covert') ?? 1,
                     'categoria_id' => $getCat($categoriaNombre),
