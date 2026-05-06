@@ -16,11 +16,11 @@ const CheckoutForm = ({ monto, onSuccess }) => {
     setError(null);
 
     try {
-      // 1. Llamamos a tu StripeController.php para obtener el clientSecret
-      const { data } = await api.post("/depositar", { amount: monto });
+      const amount = Number(monto);
+
+      const { data } = await api.post("/depositar", { amount });
       const clientSecret = data.clientSecret;
 
-      // 2. Confirmamos el pago con la tarjeta introducida en el CardElement
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: elements.getElement(CardElement),
@@ -29,14 +29,26 @@ const CheckoutForm = ({ monto, onSuccess }) => {
 
       if (result.error) {
         setError(result.error.message);
-      } else {
-        if (result.paymentIntent.status === "succeeded") {
-          alert("¡Pago realizado con éxito!");
-          onSuccess(); // Función para refrescar el saldo en el perfil
-        }
+        return;
+      }
+
+      if (result.paymentIntent?.status === "succeeded") {
+        await api.post("/confirmar-deposito", {
+          payment_intent_id: result.paymentIntent.id,
+        });
+
+        alert("Pago realizado con exito. Tu saldo ha sido actualizado.");
+        onSuccess();
       }
     } catch (err) {
-      setError("Error al conectar con el servidor");
+      console.error(err);
+
+      const serverMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Error al conectar con el servidor";
+
+      setError(serverMessage);
     } finally {
       setLoading(false);
     }
@@ -44,17 +56,31 @@ const CheckoutForm = ({ monto, onSuccess }) => {
 
   return (
     <form onSubmit={handleSubmit} className="payment-form">
-      <div style={{ padding: "10px", border: "1px solid #ccc", borderRadius: "5px", background: "white", marginBottom: "15px" }}>
-        <CardElement options={{
-          style: {
-            base: { fontSize: "16px", color: "#424770", "::placeholder": { color: "#aab7c4" } },
-            invalid: { color: "#9e2146" },
-          },
-        }} />
+      <div
+        style={{
+          padding: "10px",
+          border: "1px solid #ccc",
+          borderRadius: "5px",
+          background: "white",
+          marginBottom: "15px",
+        }}
+      >
+        <CardElement
+          options={{
+            style: {
+              base: {
+                fontSize: "16px",
+                color: "#424770",
+                "::placeholder": { color: "#aab7c4" },
+              },
+              invalid: { color: "#9e2146" },
+            },
+          }}
+        />
       </div>
       {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
       <button className="btn-custom btn-success-custom" disabled={!stripe || loading}>
-        {loading ? "Procesando..." : `Pagar ${monto} €`}
+        {loading ? "Procesando..." : `Pagar ${monto} EUR`}
       </button>
     </form>
   );
