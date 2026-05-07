@@ -24,38 +24,55 @@ class ItemResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nombre')
-                    ->required(),
+                Forms\Components\Card::make()
+                    ->schema([
+                        Forms\Components\TextInput::make('nombre')
+                            ->required(),
 
-                Forms\Components\TextInput::make('precio')
-                    ->numeric()
-                    ->required(),
+                        Forms\Components\TextInput::make('precio')
+                            ->numeric()
+                            ->prefix('$')
+                            ->required(),
 
-                Forms\Components\FileUpload::make('foto')
-                    ->image()
-                    ->directory('items'),
+                        Forms\Components\Select::make('tipo')
+                            ->options([
+                                'arma' => 'Arma',
+                                'guantes' => 'Guantes',
+                                'agente' => 'Agente',
+                            ])
+                            ->required(),
+                    ])->columns(2),
 
-                Forms\Components\Select::make('calidad_id')
-                    ->relationship('calidad', 'nombre')
-                    ->required(),
+                Forms\Components\Section::make('Archivos Multimedia')
+                    ->schema([
+                        Forms\Components\FileUpload::make('foto')
+                            ->label('Imagen de Vista Previa')
+                            ->image()
+                            ->directory('items/fotos')
+                            ->required(),
 
-                Forms\Components\Select::make('categoria_id')
-                    ->relationship('categoria', 'nombre')
-                    ->required(),
+                Forms\Components\FileUpload::make('modelo_3d')
+                    ->label('Modelo 3D (Opcional)')
+                    ->directory('items/models')
+                    ->preserveFilenames()
+                ])->columns(2),
 
-                Forms\Components\Select::make('exterior_id')
-                    ->relationship('exterior', 'nombre'),
+                Forms\Components\Section::make('Atributos')
+                    ->schema([
+                        Forms\Components\Select::make('calidad_id')
+                            ->relationship('calidad', 'nombre')
+                            ->required(),
 
-                Forms\Components\Select::make('color_id')
-                    ->relationship('color', 'nombre'),
+                        Forms\Components\Select::make('categoria_id')
+                            ->relationship('categoria', 'nombre')
+                            ->required(),
 
-                Forms\Components\Select::make('tipo')
-                    ->options([
-                        'arma' => 'Arma',
-                        'guantes' => 'Guantes',
-                        'agente' => 'Agente',
-                    ])
-                    ->required(),
+                        Forms\Components\Select::make('exterior_id')
+                            ->relationship('exterior', 'nombre'),
+
+                        Forms\Components\Select::make('color_id')
+                            ->relationship('color', 'nombre'),
+                    ])->columns(2),
             ]);
     }
 

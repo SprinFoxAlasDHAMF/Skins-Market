@@ -11,9 +11,11 @@ function Skins() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [pegatinas, setPegatinas] = useState([]);
+
   const [modosPegatinas, setModosPegatinas] = useState([]);
   const [modoPegatina, setModoPegatina] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   // Filtros
   const [calidades, setCalidades] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -28,6 +30,8 @@ function Skins() {
     precio_min: "",
     precio_max: "",
     tiene_pegatinas: "", // 👈 NUEVO
+    order_by: "nombre",
+    order_dir: "asc",
   });
   const mostrarSoloPegatinas = modoPegatina !== "";
   // Verifica login y trae filtros
@@ -52,45 +56,70 @@ function Skins() {
 
 
   // Traer skins con filtros
-  const fetchSkins = () => {
+  const fetchSkins = (isLoadMore = false, appliedFilters = filters) => {
     setLoading(true);
-    api.get("/skins", { params: filters })
-      .then(res => setSkins(res.data))
+    const currentPage = isLoadMore ? page + 1 : 1;
+    
+    api.get("/skins", { 
+      params: { 
+        ...appliedFilters, // Usamos los filtros procesados
+        modo_pegatina_id: modoPegatina,
+        page: currentPage,
+        per_page: 20 
+      } 
+    })
+
+      .then(res => {
+        // Importante: Laravel devuelve la data en res.data.data si usas ->paginate()
+        const newSkins = res.data.data || res.data;
+        
+        setSkins(prev => isLoadMore ? [...prev, ...newSkins] : newSkins);
+        setPage(currentPage);
+        
+        // Controlar si ocultamos el botón (basado en la respuesta de Laravel)
+        // Si res.data.next_page_url es null, ya no hay más skins.
+        if (res.data.next_page_url === null || newSkins.length < 20) {
+          setHasMore(false);
+        } else {
+          setHasMore(true);
+        }
+      })
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
   };
 
+
   useEffect(() => {
-    api.get("/pegatinas", {
-      params: {
-        modo_pegatina_id: modoPegatina || undefined
-      }
-    })
-      .then(res => setPegatinas(res.data))
-      .catch(err => console.error(err));
+    setPage(1); 
+    // Añadimos modoPegatina a la dependencia y al objeto de filtros
+    setFilters(prev => ({ ...prev, modo_pegatina_id: modoPegatina }));
   }, [modoPegatina]);
-  useEffect(() => {
-    api.get("/pegatinas", {
-      params: {
-        nombre: search,
-        precio_min: filters.precio_min,
-        precio_max: filters.precio_max,
-        modo_pegatina_id: modoPegatina || undefined
-      }
-    })
-      .then(res => setPegatinas(res.data))
-      .catch(err => console.error(err));
-  }, [search, filters.precio_min, filters.precio_max, modoPegatina]);
-  useEffect(() => {
-    fetchSkins();
-  }, [filters]);
+
+  
+
+  // 1. Debounce: Cuando el usuario escribe, esperamos 300ms y actualizamos el objeto filters
   useEffect(() => {
     const delay = setTimeout(() => {
       setFilters(prev => ({ ...prev, nombre: search }));
     }, 300);
-
     return () => clearTimeout(delay);
   }, [search]);
+
+  // 2. ÚNICA FUENTE DE VERDAD: Cuando CUALQUIER filtro cambie, pedimos los datos
+  useEffect(() => {
+    setPage(1);
+    
+    // Procesamos los valores para el backend
+    const filtersToSend = { ...filters };
+    if (filters.tiene_pegatinas === "1") filtersToSend.tiene_pegatinas = "si";
+    if (filters.tiene_pegatinas === "0") filtersToSend.tiene_pegatinas = "no";
+    
+    // Añadimos el modo_pegatina_id que está fuera del objeto filters
+    filtersToSend.modo_pegatina_id = modoPegatina;
+
+    fetchSkins(false, filtersToSend); 
+  }, [filters, modoPegatina]); 
+  // Nota: quitamos 'search' de aquí porque ahora dependemos de 'filters.nombre'
   
   // Manejar cambio en filtros
   const handleChange = (e) => setFilters({ ...filters, [e.target.name]: e.target.value });
@@ -108,17 +137,19 @@ function Skins() {
   };
   const handleReset = () => {
     setSearch("");
-    setModoPegatina("");   // 🔥 IMPORTANTE
-    setPegatinas([]);      // 🔥 limpia cache
+    setModoPegatina(""); 
+    // setPegatinas([]); // <--- BORRA ESTA LÍNEA, ya no existe el estado pegatinas separado
 
     setFilters({
       calidad_id: "",
       tipo: "",
       categoria_id: "",
       exterior_id: "",
-      color: "",
+      color_id: "",
       precio_min: "",
       precio_max: "",
+      tiene_pegatinas: "",
+      nombre: ""
     });
   };
     // Borrar skin (solo admin)
@@ -131,7 +162,11 @@ function Skins() {
       .then(() => setSkins(skins.filter(s => s.id !== id)))
       .catch(err => console.error(err));
   };
-
+  const handleLoadMore = () => {
+    if (!loading && hasMore) {
+      fetchSkins(true);
+    }
+  };
   return (
     <div className={`skins-container ${!isDarkMode ? "light-theme" : ""}`}>
       <div className="skins-header">
@@ -235,9 +270,17 @@ function Skins() {
 
             <div className="filter-group">
               <label>Color</label>
-              <select name="color" value={filters.color} onChange={handleChange}>
+              <select 
+                name="color_id" 
+                value={filters.color_id || ""} 
+                onChange={handleChange}
+              >
                 <option value="">Seleccionar color</option>
-                {colores.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                {colores.map(c => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombre}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -250,6 +293,29 @@ function Skins() {
               <label>Precio máximo</label>
               <input type="number" name="precio_max" value={filters.precio_max} onChange={handleChange} placeholder="$9999"/>
             </div>
+
+            <div className="filter-group">
+              <label>Ordenar por</label>
+              <select 
+                name="order_combined" 
+                value={`${filters.order_by}-${filters.order_dir}`} 
+                onChange={(e) => {
+                  const [by, dir] = e.target.value.split("-");
+                  setFilters(prev => ({ ...prev, order_by: by, order_dir: dir }));
+                }}
+              >
+                {/* Opción sin orden específico (por defecto ID o creación) */}
+                <option value="id-asc">Sin ordenar</option>
+                
+                {/* Opciones de Nombre */}
+                <option value="nombre-asc">Nombre (A-Z)</option>
+                <option value="nombre-desc">Nombre (Z-A)</option> 
+                
+                {/* Opciones de Precio */}
+                <option value="precio-asc">Precio: Menor a Mayor</option>
+                <option value="precio-desc">Precio: Mayor a Menor</option>
+              </select>
+            </div>
             <button type="button" className="btn-apply-filters" onClick={handleReset}>Resetear Filtros</button>
           </form>
         </div>
@@ -260,91 +326,49 @@ function Skins() {
           {loading && <p className="loading-text">Cargando skins...</p>}
           {!loading && skins.length === 0 && <p className="no-results-text">No se encontraron skins</p>}
 
-          <div className="skins-grid">
-              {!mostrarSoloPegatinas && skins.map(skin => (
-                <div key={skin.id} className="skin-card">
-                <img
-                  src={`http://localhost:8000/${skin.foto}`}
-                  alt={skin.nombre}
-                  onError={(e) => {
-                    // Si ya intentamos poner el placeholder y volvió a fallar, 
-                    // evitamos que siga intentándolo infinitamente
-                    if (e.target.src !== 'https://placehold.co/280x280?text=Sin+Imagen') {
-                      e.target.onerror = null; 
-                      e.target.src = 'https://placehold.co/280x280?text=Sin+Imagen';
-                    }
-                  }}
+        <div className="skins-grid">
+          {skins.map((item) => (
+            <div key={`${item.tipo_item}-${item.id}`} className="skin-card">
+            <img
+                  src={`http://localhost:8000/${item.imagen || item.foto}`}
+                  alt={item.nombre}
                 />
-                <div className="skin-card-body">
-                  <h5>{skin.nombre}</h5>
-                  <p><strong>${skin.precio}</strong></p>
-                  {skin.calidad && <p><span>Calidad:</span> <strong>{skin.calidad}</strong></p>}
-                  {skin.categoria && <p><span>Categoría:</span> <strong>{skin.categoria}</strong></p>}
-                  {skin.exterior && <p><span>Exterior:</span> <strong>{skin.exterior}</strong></p>}
-                  {skin.color && <p><span>Color:</span> <strong>{skin.color}</strong></p>}
+              {/* Dentro del map de skins */}
+              <div className="skin-card-body">
+                <h5>{item.nombre}</h5>
+                <p><strong>${item.precio}</strong></p>
+                
+                <p>
+                  <span>{item.tipo_item === 'skin' ? 'Calidad:' : 'Modo:'}</span> 
+                  {item.info_extra} 
+                </p>
 
-                  <div className="skin-card-actions">
-                    {isAdmin() && (
-                      <>
-                        <button className="btn-edit" onClick={() => navigate(`/admin/skins/${skin.id}/edit`)}>
-                          Editar
-                        </button>
-                        <button className="btn-delete" onClick={() => handleDelete(skin.id)}>
-                          Borrar
-                        </button>
-                      </>
-                    )}
-                    <button className="btn-view-details" onClick={() => navigate(`/skins/${skin.id}`)}>
-                      Ver Detalles
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {/* PEGATINAS */}
-            <div className="skins-results">
-              <h4>Pegatinas Disponibles</h4>
-
-              {pegatinas.length === 0 && (
-                <p className="no-results-text">No hay pegatinas</p>
-              )}
-
-              <div className="skins-grid">
-                {pegatinas.map(p => (
-                  <div key={p.id} className="skin-card">
-                    <img
-                      src={`http://localhost:8000/${p.imagen}`}
-                      alt={p.nombre}
-                      onError={(e) =>
-                        (e.target.src = "https://via.placeholder.com/280x280?text=Sin+imagen")
-                      }
-                    />
-
-                    <div className="skin-card-body">
-                      <h5>{p.nombre}</h5>
-                      <p><strong>${p.precio}</strong></p>
-                      <p>
-                        <span>Modo:</span>{" "}
-                        <strong>{p.modo || "Normal"}</strong>
-                      </p>
-
-                      <button
-                        className="btn-view-details"
-                        onClick={() => navigate(`/pegatinas/${p.id}`)}
-                      >
-                        Ver Detalles
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                {item.tipo_item === 'skin' ? (
+                  <button onClick={() => navigate(`/skins/${item.id}`)}>Ver Skin</button>
+                ) : (
+                  <button onClick={() => navigate(`/pegatinas/${item.id}`)}>Ver Pegatina</button>
+                )}
               </div>
             </div>
-          </div>
-
+          ))}
         </div>
-        
-      </div>
-    </div>
+            </div>
+          </div>
+            {!mostrarSoloPegatinas && skins.length > 0 && hasMore && (
+                <div className="load-more-container">
+                    <button 
+                        className="btn-load-more" 
+                        onClick={handleLoadMore} 
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <span className="spinner"></span> 
+                        ) : "Cargar más skins"}
+                    </button>
+                </div>
+            )}
+        </div>
+
   );
 }
 

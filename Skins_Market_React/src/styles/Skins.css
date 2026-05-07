@@ -20,7 +20,33 @@ body {
   position: relative;
   z-index: 1;
 }
+.load-more-container {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+    width: 100%;
+}
 
+.btn-load-more {
+    padding: 12px 30px;
+    background-color: #ff4747; /* Color CSGO */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-load-more:hover:not(:disabled) {
+    transform: scale(1.05);
+    background-color: #e63e3e;
+}
+
+.btn-load-more:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}
 .skins-header h1 {
   margin: 0;
   font-size: 2.5rem;

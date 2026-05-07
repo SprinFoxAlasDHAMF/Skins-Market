@@ -80,7 +80,7 @@ class ItemSeeder extends Seeder
         // 🧤 GLOVES (GUANTES)
         // ======================================================
         $guantes = [
-            ['nombre'=>'Sport Gloves | Pandora’s Box','color'=>'morado','precio'=>8000,'foto'=>'items/guantes/Gloves_Pandora’s_Box_factory_new.png','exterior_id'=>1],
+            ['nombre'=>'Sport Gloves | Pandora’s Box','color'=>'morado','precio'=>8000,'foto'=>'items/guantes/Gloves_Pandora’s_Box_factory_new.png', 'modelo_3d'=>'modelos/csgo_pandoras_box_gloves.glb','exterior_id'=>1],
             ['nombre'=>'Driver Gloves | Crimson Weave','color'=>'rojo','precio'=>1500,'foto'=>'items/guantes/Gloves_Crimson_Weave_factory_new.png','exterior_id'=>1],
             ['nombre'=>'Hand Wraps | Slaughter','color'=>'rojo','precio'=>1200,'foto'=>'items/guantes/Gloves_Slaughter_factory_new.png','exterior_id'=>1],
             ['nombre'=>'Moto Gloves | Spearmint','color'=>'verde','precio'=>2000,'foto'=>'items/guantes/Gloves_Spearmint_factory_new.png','exterior_id'=>1],
