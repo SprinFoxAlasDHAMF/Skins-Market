@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/api";
+import { useTranslation } from "react-i18next";
 
 function PegatinaDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [pegatina, setPegatina] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,15 +23,15 @@ function PegatinaDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <p>⏳ Cargando pegatina...</p>;
-  if (!pegatina) return <p>❌ Pegatina no encontrada</p>;
+  if (loading) return <p>{t("loading_sticker")}</p>;
+  if (!pegatina) return <p>{t("sticker_not_found")}</p>;
 
   return (
     <div className="skin-detail-container">
 
       <div className="skin-detail-header">
         <button onClick={() => navigate(-1)}>
-          ← Volver
+          ← {t("back")}
         </button>
       </div>
 
@@ -54,13 +56,14 @@ function PegatinaDetail() {
           </div>
 
           <p>
-            <strong>Modo:</strong>{" "}
+            <strong>{t("mode")}:</strong>{" "}
             {pegatina.modo ?? "N/A"}
           </p>
 
           <button onClick={() => navigate("/skins")}>
-            Ver Skins
+            {t("view_skins")}
           </button>
+
         </div>
 
       </div>

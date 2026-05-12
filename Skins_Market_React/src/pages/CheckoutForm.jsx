@@ -37,7 +37,6 @@ const CheckoutForm = ({ monto, onSuccess }) => {
           payment_intent_id: result.paymentIntent.id,
         });
 
-        alert("Pago realizado con exito. Tu saldo ha sido actualizado.");
         onSuccess();
       }
     } catch (err) {

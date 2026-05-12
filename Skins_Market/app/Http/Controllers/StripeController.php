@@ -12,7 +12,8 @@ use Stripe\Exception\ApiErrorException;
 use Stripe\PaymentIntent;
 use Stripe\Stripe;
 use Stripe\Transfer;
-
+use App\Mail\DepositoConfirmado;
+use Illuminate\Support\Facades\Mail;
 class StripeController extends Controller
 {
     public function depositar(Request $request)
@@ -119,7 +120,13 @@ class StripeController extends Controller
             $monto = $paymentIntent->amount / 100;
             $user->amount = ($user->amount ?? 0) + $monto;
             $user->save();
-
+            try {
+                Mail::to($user->email)->send(
+                    new DepositoConfirmado($monto, $user->amount)
+                );
+            } catch (\Throwable $e) {
+                Log::error("Error enviando email: " . $e->getMessage());
+            }
             return response()->json([
                 'message' => 'Deposito confirmado.',
                 'nuevo_saldo' => $user->amount,

@@ -2,8 +2,11 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { useEffect, useState } from "react";
 import CheckoutForm from "./CheckoutForm";
+import { useTranslation } from "react-i18next";
 
 function Recargar() {
+  const { t } = useTranslation();
+
   const [monto, setMonto] = useState(10);
   const [stripePromise, setStripePromise] = useState(null);
   const [stripeError, setStripeError] = useState(null);
@@ -14,7 +17,7 @@ function Recargar() {
     const stripeKey = import.meta.env.VITE_STRIPE_KEY;
 
     if (!stripeKey) {
-      setStripeError("Falta configurar VITE_STRIPE_KEY en el frontend.");
+      setStripeError(t("payment.missing_key"));
       return undefined;
     }
 
@@ -23,7 +26,7 @@ function Recargar() {
         if (!isMounted) return;
 
         if (!stripe) {
-          setStripeError("No se pudo cargar Stripe en el navegador.");
+          setStripeError(t("payment.load_error"));
           return;
         }
 
@@ -31,21 +34,25 @@ function Recargar() {
       })
       .catch(() => {
         if (isMounted) {
-          setStripeError("No se pudo cargar Stripe. Revisa si el navegador bloquea js.stripe.com.");
+          setStripeError(t("payment.browser_block"));
         }
       });
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [t]);
 
   return (
     <div className="perfil-container">
-      <h2>Recargar saldo</h2>
+
+      <h2>{t("payment.title")}</h2>
 
       <div className="mb-3">
-        <label className="form-label">Monto a recargar (EUR)</label>
+        <label className="form-label">
+          {t("payment.amount")}
+        </label>
+
         <input
           type="number"
           className="form-control"
@@ -56,20 +63,23 @@ function Recargar() {
       </div>
 
       {stripeError && (
-        <div className="alert alert-danger" role="alert">
+        <div className="alert alert-danger">
           {stripeError}
         </div>
       )}
 
       {!stripeError && !stripePromise && (
-        <div className="alert alert-warning" role="alert">
-          Cargando formulario de pago...
+        <div className="alert alert-warning">
+          {t("payment.loading")}
         </div>
       )}
 
       {!stripeError && stripePromise && Number(monto) > 0 && (
         <Elements stripe={stripePromise}>
-          <CheckoutForm monto={monto} onSuccess={() => (window.location.href = "/perfil")} />
+          <CheckoutForm
+            monto={monto}
+            onSuccess={() => (window.location.href = "/perfil")}
+          />
         </Elements>
       )}
     </div>

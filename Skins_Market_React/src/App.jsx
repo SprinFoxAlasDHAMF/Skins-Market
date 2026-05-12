@@ -8,7 +8,7 @@ import UserPerfil from "./pages/UserPerfil";
 import Favoritos from "./pages/Favoritos";
 import Recargar from "./pages/Recargar";
 import PegatinaDetail from "./pages/PegatinaDetail";
-
+import About from './pages/About';
 function App() {
   return (
     <BrowserRouter>
@@ -29,8 +29,9 @@ function App() {
 
         <Route path="/recargar" element={<Recargar />} />
 
-        {/* 🔥 SOLO ESTA */}
         <Route path="/pegatinas/:id" element={<PegatinaDetail />} />
+
+        <Route path="/qui-som" element={<About />} />
 
       </Routes>
     </BrowserRouter>

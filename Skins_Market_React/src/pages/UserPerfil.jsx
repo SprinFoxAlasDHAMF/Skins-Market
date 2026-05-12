@@ -2,110 +2,103 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import "../styles/UserPerfil.css";
+import { useTranslation } from "react-i18next";
 
 function UserPerfil() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   const [nombre, setNombre] = useState("");
   const [foto, setFoto] = useState(null);
-  const [preview, setPreview] = useState(null); // Estado para previsualización
+  const [preview, setPreview] = useState(null);
   const [user, setUser] = useState(null);
-  const [errores, setErrores] = useState({}); // Para errores de validación
-  
-  // Estados para controlar cambios
+  const [errores, setErrores] = useState({});
+
   const [nombreInicial, setNombreInicial] = useState("");
   const [fotoInicial, setFotoInicial] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Cargar datos del usuario
   useEffect(() => {
     api.get("/user")
       .then(res => {
-        console.log("Datos del usuario:", res.data);
-        console.log("Foto perfil:", res.data.foto_perfil);
         setUser(res.data);
         setNombre(res.data.nombre);
-        setNombreInicial(res.data.nombre); // Guardar valor inicial
-        setFotoInicial(res.data.foto_perfil); // Guardar foto inicial
+        setNombreInicial(res.data.nombre);
+        setFotoInicial(res.data.foto_perfil);
+
         if (res.data.foto_perfil) {
-          const fotoUrl = `http://localhost:8000/storage/${res.data.foto_perfil}`;
-          console.log("URL de la foto:", fotoUrl);
-          setPreview(fotoUrl);
-        } else {
-          console.log("No hay foto de perfil guardada");
+          setPreview(`http://localhost:8000/storage/${res.data.foto_perfil}`);
         }
       })
       .catch(() => navigate("/login"));
   }, [navigate]);
 
-  // Detectar cambios en nombre o foto
   useEffect(() => {
     const nombreCambio = nombre !== nombreInicial;
-    const fotoCambio = foto !== null; // Si hay un archivo seleccionado, hay cambio
+    const fotoCambio = foto !== null;
     setHasChanges(nombreCambio || fotoCambio);
   }, [nombre, nombreInicial, foto]);
 
-  // Actualizar preview cuando el usuario selecciona una foto nueva
   const handleFotoChange = (e) => {
     const file = e.target.files[0];
     setFoto(file);
+
     if (file) {
       setPreview(URL.createObjectURL(file));
-    } else {
-      setPreview(user?.foto_perfil 
-        ? `http://localhost:8000/storage/${user.foto_perfil}` 
-        : null
-      );
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrores({}); // Limpiar errores previos
+    setErrores({});
 
     const data = new FormData();
     data.append("nombre", nombre);
     if (foto) data.append("foto", foto);
-    data.append("_method", "PUT"); // Laravel interpreta como PUT
+    data.append("_method", "PUT");
 
     try {
       const res = await api.post("/user", data);
       setUser(res.data.user);
-      alert("Perfil actualizado ✅");
 
-      // Resetear valores iniciales después de guardar
       setNombreInicial(res.data.user.nombre);
       setFotoInicial(res.data.user.foto_perfil);
-      setFoto(null); // Limpiar archivo seleccionado
+      setFoto(null);
 
-      // Actualizar preview si cambió la foto
       if (res.data.user.foto_perfil) {
         setPreview(`http://localhost:8000/storage/${res.data.user.foto_perfil}`);
       }
+
+      alert(t("profile.updated"));
     } catch (err) {
       if (err.response?.status === 422) {
         setErrores(err.response.data.errors);
       } else {
-        console.error(err);
-        alert("Error al actualizar el perfil");
+        alert(t("profile.error"));
       }
     }
   };
 
-  if (!user) return <h2 className="loading-text">Cargando...</h2>;
+  if (!user) return <h2 className="loading-text">{t("loading")}</h2>;
 
   return (
     <div className="perfil-container">
-      <button className="btn-custom btn-secondary-custom mb-3" onClick={() => navigate("/skins")}>
-          ← Volver a Skins
-        </button>
+
+      <button
+        className="btn-custom btn-secondary-custom mb-3"
+        onClick={() => navigate("/skins")}
+      >
+        ← {t("back_to_skins")}
+      </button>
+
       <div className="perfil-header">
-        <h2>Mi perfil</h2>
+        <h2>{t("my_profile")}</h2>
       </div>
 
-      
-
       <form onSubmit={handleSubmit} encType="multipart/form-data" className="perfil-form">
+
         <div className="form-group">
+
           {preview && (
             <div className="perfil-foto-container">
               <img
@@ -114,19 +107,23 @@ function UserPerfil() {
                 width={150}
                 className="perfil-foto mb-3"
                 onError={(e) => {
-                  console.error("Error cargando imagen:", preview);
-                  e.target.style.display = 'none';
+                  e.target.style.display = "none";
                 }}
               />
             </div>
           )}
+
           <div className="form-group form-group-file text-center">
-            <label className="form-label form-label-subtle">Seleccionar nueva foto</label>
+            <label className="form-label form-label-subtle">
+              {t("select_photo")}
+            </label>
+
             <input
               type="file"
-              className={`form-control file-input ${errores.foto ? 'is-invalid' : ''}`}
+              className={`form-control file-input ${errores.foto ? "is-invalid" : ""}`}
               onChange={handleFotoChange}
             />
+
             {errores.foto && (
               <div className="invalid-feedback">
                 {errores.foto.join(", ")}
@@ -134,39 +131,45 @@ function UserPerfil() {
             )}
           </div>
 
-          
+          <label className="form-label">{t("name")}</label>
 
-      <label className="form-label">Nombre</label>
           <input
             type="text"
-            className={`form-control ${errores.nombre ? 'is-invalid' : ''}`}
+            className={`form-control ${errores.nombre ? "is-invalid" : ""}`}
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             required
           />
+
           {errores.nombre && (
             <div className="invalid-feedback">
               {errores.nombre.join(", ")}
             </div>
           )}
+
         </div>
 
         <div className="text-center">
-          <button 
-            type="submit" 
-            className="btn-custom btn-primary-custom" 
+          <button
+            type="submit"
+            className="btn-custom btn-primary-custom"
             disabled={!hasChanges}
           >
-            Guardar cambios
+            {t("save_changes")}
           </button>
         </div>
       </form>
 
       <div className="saldo-section">
-        <h3>Saldo</h3>
+        <h3>{t("balance")}</h3>
+
         <p className="saldo-amount">{user.saldo} €</p>
-        <button className="btn-custom btn-success-custom" onClick={() => navigate("/recargar")}>
-          Recargar saldo
+
+        <button
+          className="btn-custom btn-success-custom"
+          onClick={() => navigate("/recargar")}
+        >
+          {t("recharge")}
         </button>
       </div>
     </div>

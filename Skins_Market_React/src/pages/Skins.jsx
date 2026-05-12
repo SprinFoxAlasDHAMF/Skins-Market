@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { isLoggedIn, logout, isAdmin } from "../utils/auth";
 import "../styles/Skins.css";
-
+import { useTranslation } from "react-i18next";
 
 function Skins() {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ function Skins() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(true);
-
+  const { t, i18n } = useTranslation();
   const [modosPegatinas, setModosPegatinas] = useState([]);
   const [modoPegatina, setModoPegatina] = useState("");
   const [page, setPage] = useState(1);
@@ -138,7 +138,6 @@ function Skins() {
   const handleReset = () => {
     setSearch("");
     setModoPegatina(""); 
-    // setPegatinas([]); // <--- BORRA ESTA LÍNEA, ya no existe el estado pegatinas separado
 
     setFilters({
       calidad_id: "",
@@ -170,7 +169,11 @@ function Skins() {
   return (
     <div className={`skins-container ${!isDarkMode ? "light-theme" : ""}`}>
       <div className="skins-header">
-        <h1>Skins CS:GO</h1>
+      <h1>{t("title")}</h1>        
+      <div className="lang-switcher">
+        <button className="btn-custom btn-secondary-custom" onClick={() => i18n.changeLanguage("es")}>ES</button>
+        <button className="btn-custom btn-secondary-custom" onClick={() => i18n.changeLanguage("en")}>EN</button>
+      </div>
         <div className="skins-header-actions">
           <button 
             className="btn-custom btn-theme-toggle" 
@@ -178,16 +181,36 @@ function Skins() {
           >
             {isDarkMode ? "☀️ Modo Claro" : "🌙 Modo Oscuro"}
           </button>
-          <button className="btn-custom btn-secondary-custom" onClick={logout}>Logout</button>
-          <button className="btn-custom btn-secondary-custom" onClick={() => navigate("/perfil")}>Mi Perfil</button>
-          {!isAdmin() && (
-            <button className="btn-custom btn-secondary-custom" onClick={() => navigate("/favoritos")}>Favoritos</button>
-          )}
+          
+          <button onClick={logout}>{t("logout")}</button>
+          <button onClick={() => navigate("/perfil")}>{t("perfil")}</button>
+          <button onClick={() => navigate("/qui-som")}>{t("quien_somos")}</button>
+          <button onClick={() => navigate("/favoritos")}>{t("favoritos")}</button>
           {isAdmin() && (
             <button className="btn-custom btn-success-custom" onClick={() => navigate("/admin/skins/new")}>
               Crear Skin
             </button>
           )}
+        </div>
+        <div className="filter-group">
+          <label>{t("ordenar")}</label>
+
+          <select
+            name="order_combined"
+            value={`${filters.order_by}-${filters.order_dir}`}
+            onChange={(e) => {
+              const [by, dir] = e.target.value.split("-");
+              setFilters(prev => ({ ...prev, order_by: by, order_dir: dir }));
+            }}
+          >
+            <option value="id-asc">{t("sort_none")}</option>
+
+            <option value="nombre-asc">{t("sort_name_asc")}</option>
+            <option value="nombre-desc">{t("sort_name_desc")}</option>
+
+            <option value="precio-asc">{t("sort_price_asc")}</option>
+            <option value="precio-desc">{t("sort_price_desc")}</option>
+          </select>
         </div>
       </div>
 
@@ -195,37 +218,36 @@ function Skins() {
         {/* FILTROS */}
         
         <div className="skins-filters">
-          <h4>Filtros</h4>
-          <div className="filter-group">
-            <label>Buscar por nombre</label>
+        <h4>{t("filters")}</h4>
+         <div className="filter-group">
+          <label>{t("search_name")}</label>
             <input
               type="text"
-              placeholder="Escribe el nombre de la skin"
+              placeholder={t("search_placeholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
         </div>
         <div className="filter-group">
-          <label>Pegatinas</label>
+        <label>{t("stickers")}</label>
           <select
             name="tiene_pegatinas"
             value={filters.tiene_pegatinas}
             onChange={handleChange}
           >
-            <option value="">Todas</option>
-            <option value="1">Con pegatinas</option>
-            <option value="0">Sin pegatinas</option>
+            <option value="">{t("all")}</option>
+            <option value="1">{t("with_stickers")}</option>
+            <option value="0">{t("without_stickers")}</option>
           </select>
         </div>
         <div className="filter-group">
-          <label>Modo de Pegatina</label>
+        <label>{t("sticker_mode")}</label>
 
           <select
             value={modoPegatina}
             onChange={(e) => setModoPegatina(e.target.value)}
           >
-            <option value="">Todos</option>
-
+            <option value="">{t("all")}</option>
             {modosPegatinas.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.nombre}
@@ -235,47 +257,47 @@ function Skins() {
         </div>
           <form onSubmit={handleSubmit}>
             <div className="filter-group">
-              <label>Calidad</label>
+              <label>{t("calidad")}</label>
               <select name="calidad_id" value={filters.calidad_id} onChange={handleChange}>
-                <option value="">Seleccionar calidad</option>
+              <option value="">{t("select_quality")}</option>
                 {calidades.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
               </select> 
             </div>
 
             <div className="filter-group">
-              <label>Tipo</label>
+              <label>{t("tipo")}</label>
               <select name="tipo" value={filters.tipo} onChange={handleChange}>
-                <option value="">Seleccionar tipo</option>
-                <option value="arma">Arma</option>
-                <option value="guantes">Guantes</option>
-                <option value="agente">Agente</option>
+              <option value="">{t("select_type")}</option>
+              <option value="arma">{t("weapon")}</option>
+              <option value="guantes">{t("gloves")}</option>
+              <option value="agente">{t("agent")}</option>
               </select>
             </div>
 
             <div className="filter-group">
-              <label>Categoría</label>
+              <label>{t("categoria")}</label>
               <select name="categoria_id" value={filters.categoria_id} onChange={handleChange}>
-                <option value="">Seleccionar categoría</option>
+              <option value="">{t("select_category")}</option>
                 {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
               </select>
             </div>
 
             <div className="filter-group">
-              <label>Exterior</label>
+              <label>{t("exterior")}</label>
               <select name="exterior_id" value={filters.exterior_id} onChange={handleChange}>
-                <option value="">Seleccionar exterior</option>
+              <option value="">{t("select_exterior")}</option>
                 {exteriores.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
               </select>
             </div>
 
             <div className="filter-group">
-              <label>Color</label>
+              <label>{t("color")}</label>
               <select 
                 name="color_id" 
                 value={filters.color_id || ""} 
                 onChange={handleChange}
               >
-                <option value="">Seleccionar color</option>
+                <option value="">{t("select_color")}</option>
                 {colores.map(c => (
                   <option key={c.id} value={c.id}>
                     {c.nombre}
@@ -285,46 +307,25 @@ function Skins() {
             </div>
 
             <div className="filter-group">
-              <label>Precio mínimo</label>
+            <label>{t("min_price")}</label>
               <input type="number" name="precio_min" value={filters.precio_min} onChange={handleChange} placeholder="$0"/>
             </div>
 
             <div className="filter-group">
-              <label>Precio máximo</label>
+            <label>{t("max_price")}</label>
               <input type="number" name="precio_max" value={filters.precio_max} onChange={handleChange} placeholder="$9999"/>
             </div>
 
-            <div className="filter-group">
-              <label>Ordenar por</label>
-              <select 
-                name="order_combined" 
-                value={`${filters.order_by}-${filters.order_dir}`} 
-                onChange={(e) => {
-                  const [by, dir] = e.target.value.split("-");
-                  setFilters(prev => ({ ...prev, order_by: by, order_dir: dir }));
-                }}
-              >
-                {/* Opción sin orden específico (por defecto ID o creación) */}
-                <option value="id-asc">Sin ordenar</option>
-                
-                {/* Opciones de Nombre */}
-                <option value="nombre-asc">Nombre (A-Z)</option>
-                <option value="nombre-desc">Nombre (Z-A)</option> 
-                
-                {/* Opciones de Precio */}
-                <option value="precio-asc">Precio: Menor a Mayor</option>
-                <option value="precio-desc">Precio: Mayor a Menor</option>
-              </select>
-            </div>
-            <button type="button" className="btn-apply-filters" onClick={handleReset}>Resetear Filtros</button>
+
+            <button type="button" className="btn-apply-filters" onClick={handleReset}>  {t("reset_filters")}</button>
           </form>
         </div>
 
         {/* RESULTADOS */}
         <div className="skins-results">
-          <h4>Skins Disponibles</h4>
-          {loading && <p className="loading-text">Cargando skins...</p>}
-          {!loading && skins.length === 0 && <p className="no-results-text">No se encontraron skins</p>}
+        <h4>{t("available_skins")}</h4>
+          {loading && <p className="loading-text">{t("loading")}</p>}
+          {!loading && skins.length === 0 && <p className="no-results-text">{t("no_results")}</p>}
 
         <div className="skins-grid">
           {skins.map((item) => (
@@ -344,9 +345,9 @@ function Skins() {
                 </p>
 
                 {item.tipo_item === 'skin' ? (
-                  <button onClick={() => navigate(`/skins/${item.id}`)}>Ver Skin</button>
+                  <button onClick={() => navigate(`/skins/${item.id}`)}>  {t("view_skin")}</button>
                 ) : (
-                  <button onClick={() => navigate(`/pegatinas/${item.id}`)}>Ver Pegatina</button>
+                  <button onClick={() => navigate(`/pegatinas/${item.id}`)}>  {t("view_sticker")}</button>
                 )}
               </div>
             </div>
@@ -361,9 +362,7 @@ function Skins() {
                         onClick={handleLoadMore} 
                         disabled={loading}
                     >
-                        {loading ? (
-                            <span className="spinner"></span> 
-                        ) : "Cargar más skins"}
+                    {loading ? t("loading") : t("load_more")}
                     </button>
                 </div>
             )}

@@ -402,3 +402,10 @@ body {
     width: 100%;
   }
 }
+
+.lang-switcher {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 10px;
+}
