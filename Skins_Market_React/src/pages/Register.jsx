@@ -1,52 +1,45 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/api";
-import { useNavigate, Link } from "react-router-dom";
 
 function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const blockClipboard = (e) => e.preventDefault();
 
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [error, setError] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
-  const [passwordStrength, setPasswordStrength] = useState(0);
   const [capsLock, setCapsLock] = useState(false);
 
   const navigate = useNavigate();
 
-  const blockClipboard = (e) => e.preventDefault();
-
-  const handleKeyCheck = (e) => {
-    setCapsLock(e.getModifierState && e.getModifierState("CapsLock"));
+  //CHECKS PASSWORD
+  const checks = {
+    length: password.length >=5,
+    upper: /[A-Z]/.test(password),
+    lower: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[^A-Za-z0-9]/.test(password),
   };
 
-  const checkPasswordStrength = (pass) => {
-    let strength = 0;
-
-    if (pass.length >= 8) strength++;
-    if (/[A-Z]/.test(pass)) strength++;
-    if (/[a-z]/.test(pass)) strength++;
-    if (/[0-9]/.test(pass)) strength++;
-    if (/[^A-Za-z0-9]/.test(pass)) strength++;
-
-    setPasswordStrength(strength);
-  };
+  const strength = Object.values(checks).filter(Boolean).length;
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setError("");
 
-    // ❌ bloqueo contraseña débil
-    if (passwordStrength < 5) {
-      alert("La contraseña no es lo suficientemente segura");
+    if (password !== passwordConfirm) {
+      setError("Las contraseñas no coinciden");
       return;
     }
 
-    // ❌ bloqueo si no coinciden
-    if (password !== passwordConfirm) {
-      alert("Las contraseñas no coinciden");
+    if (strength < 5) {
+      setError("La contraseña es demasiado débil");
       return;
     }
 
@@ -58,135 +51,167 @@ function Register() {
         password_confirmation: passwordConfirm,
       });
 
-      alert("Usuario creado. Ahora inicia sesión.");
       navigate("/login");
-    } catch (error) {
-      alert("Error al registrarse");
+    } catch (err) {
+      console.log(err.response.data);
+      setError("Error al registrarse");
     }
   };
 
+  const handleKey = (e) => {
+    setCapsLock(e.getModifierState && e.getModifierState("CapsLock"));
+  };
+
   return (
-    <div>
-      <h1>Registro</h1>
+    <div className="container mt-5" style={{ maxWidth: "400px" }}>
+      <h2>Registro</h2>
+
+      {error && <div className="alert alert-danger">{error}</div>}
 
       <form onSubmit={handleRegister}>
-        <input
-          type="text"
-          placeholder="Nombre"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <br /><br />
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <br /><br />
+        {/* NAME */}
+        <div className="mb-3">
+          <label>Nombre</label>
+          <input
+            type="text"
+            className="form-control"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+
+        {/* EMAIL */}
+        <div className="mb-3">
+          <label>Email</label>
+          <input
+            type="email"
+            className="form-control"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
 
         {/* PASSWORD */}
-        <div style={{ position: "relative", display: "inline-block" }}>
+        <div className="mb-3">
+          <label>Contraseña</label>
+
+          <div style={{ position: "relative" }}>
           <input
             type={showPassword ? "text" : "password"}
-            placeholder="Contraseña"
+            className="form-control"
             value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              checkPasswordStrength(e.target.value);
-            }}
-            onKeyDown={handleKeyCheck}
-            onKeyUp={handleKeyCheck}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={handleKey}
+            onKeyUp={handleKey}
             onCopy={blockClipboard}
             onPaste={blockClipboard}
             onCut={blockClipboard}
+            required
           />
 
-          <span
-            onClick={() => setShowPassword(!showPassword)}
-            style={{
-              position: "absolute",
-              right: "8px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              cursor: "pointer",
-            }}
-          >
-            {showPassword ? "🔓" : "🔒"}
-          </span>
-        </div>
+            <span
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                cursor: "pointer",
+              }}
+            >
+              {showPassword ? "🔓" : "🔒"}
+            </span>
+          </div>
 
-        <br /><br />
+          {/* 🔥 BARRA SEGURIDAD */}
+          <div className="mt-2" style={{ height: "6px", background: "#ddd" }}>
+            <div
+              style={{
+                width: `${(strength / 5) * 100}%`,
+                height: "100%",
+                transition: "0.3s",
+                background:
+                  strength <= 2
+                    ? "red"
+                    : strength <= 4
+                    ? "orange"
+                    : "green",
+              }}
+            />
+          </div>
+
+          {/* ✔ CHECKS */}
+          <small>
+            <div style={{ color: checks.length ? "green" : "#999" }}>
+              ✔ 5 caracteres
+            </div>
+            <div style={{ color: checks.upper ? "green" : "#999" }}>
+              ✔ Mayúscula
+            </div>
+            <div style={{ color: checks.lower ? "green" : "#999" }}>
+              ✔ Minúscula
+            </div>
+            <div style={{ color: checks.number ? "green" : "#999" }}>
+              ✔ Número
+            </div>
+            <div style={{ color: checks.special ? "green" : "#999" }}>
+              ✔ Símbolo
+            </div>
+          </small>
+        </div>
 
         {/* CONFIRM PASSWORD */}
-        <div style={{ position: "relative", display: "inline-block" }}>
-          <input
-            type={showPasswordConfirm ? "text" : "password"}
-            placeholder="Confirmar contraseña"
-            value={passwordConfirm}
-            onChange={(e) => setPasswordConfirm(e.target.value)}
-            onKeyDown={handleKeyCheck}
-            onKeyUp={handleKeyCheck}
-            onCopy={blockClipboard}
-            onPaste={blockClipboard}
-            onCut={blockClipboard}
-          />
+        <div className="mb-3">
+          <label>Confirmar contraseña</label>
 
-          <span
-            onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
-            style={{
-              position: "absolute",
-              right: "8px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              cursor: "pointer",
-            }}
-          >
-            {showPasswordConfirm ? "🔓" : "🔒"}
-          </span>
+          <div style={{ position: "relative" }}>
+            <input
+              type={showPasswordConfirm ? "text" : "password"}
+              className="form-control"
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
+              onKeyDown={handleKey}
+              onKeyUp={handleKey}
+              onCopy={blockClipboard}
+              onPaste={blockClipboard}
+              onCut={blockClipboard}
+              required
+            />
+
+            <span
+              onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                cursor: "pointer",
+              }}
+            >
+              {showPasswordConfirm ? "🔓" : "🔒"}
+            </span>
+          </div>
+
+          {capsLock && (
+            <small style={{ color: "orange" }}>
+              ⚠️ Bloq Mayús activado
+            </small>
+          )}
         </div>
 
-        {/* BARRA SEGURIDAD */}
-        <div style={{ marginTop: "10px", height: "8px", background: "#ddd" }}>
-          <div
-            style={{
-              width: `${(passwordStrength / 5) * 100}%`,
-              height: "100%",
-              transition: "0.3s",
-              background:
-                passwordStrength <= 2
-                  ? "red"
-                  : passwordStrength <= 4
-                  ? "orange"
-                  : "green",
-            }}
-          />
-        </div>
-
-        <small>
-          Seguridad de contraseña:{" "}
-          {passwordStrength <= 2
-            ? "Débil"
-            : passwordStrength <= 4
-            ? "Media"
-            : "Fuerte"}
-        </small>
-
-        <br /><br />
-
-        {capsLock && (
-          <small style={{ color: "orange" }}>
-            ⚠️ Bloq Mayús activado
-          </small>
-        )}
-
-        <br /><br />
-
-        <button type="submit">Registrarse</button>
+        <button
+          type="submit"
+          className="btn btn-primary w-100"
+          disabled={strength < 5}
+        >
+          Registrarse
+        </button>
       </form>
 
-      <p>
+      <p className="mt-3 text-center">
         ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
       </p>
     </div>

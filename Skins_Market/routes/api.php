@@ -19,6 +19,8 @@ use App\Http\Controllers\PegatinaController;
 */
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/modelos/{filename}', function ($filename) {
     $path = public_path('modelos/' . $filename);
@@ -36,6 +38,23 @@ Route::get('/modelos/{filename}', function ($filename) {
     $response->header("Access-Control-Allow-Origin", "http://localhost:5173"); 
     
     return $response;
+});
+
+Route::middleware('auth:sanctum')->post('/email/resend-verification', function (Request $request) {
+
+    $user = $request->user();
+
+    if ($user->hasVerifiedEmail()) {
+        return response()->json([
+            'message' => 'El email ya está verificado'
+        ]);
+    }
+
+    $user->sendEmailVerificationNotification();
+
+    return response()->json([
+        'message' => 'Correo de verificación reenviado'
+    ]);
 });
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/login', [LoginController::class, 'login']);

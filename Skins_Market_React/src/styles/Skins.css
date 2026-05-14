@@ -8,6 +8,81 @@ body {
   font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: inherit;
+
+  font-size: 20px;
+  cursor: pointer;
+
+  padding: 8px;
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: 0.2s ease;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.light-theme .icon-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.icon-btn.logout {
+  color: #ff4d4d;
+}
+
+.icon-btn.admin {
+  color: #4caf50;
+}
+.top-navbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 15px 30px;
+  margin-bottom: 20px;
+
+  background-color: #111114;
+  border-bottom: 1px solid #2a2a2f;
+}
+
+.light-theme .top-navbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #dcdcdc;
+}
+
+.top-navbar-left h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.top-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.top-navbar-right button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.top-navbar-right button:hover {
+  transform: translateY(-2px);
+}
 .skins-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -408,4 +483,305 @@ body {
   gap: 8px;
   justify-content: center;
   margin-top: 10px;
+}
+.app-footer {
+  width: 100%;
+  margin-top: 60px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 20px 30px;
+
+  background-color: #111114;
+  border-top: 1px solid #2a2a2f;
+
+  color: #fff;
+}
+
+.light-theme .app-footer {
+  background-color: #ffffff;
+  border-top: 1px solid #dcdcdc;
+  color: #000;
+}
+.app-footer {
+  width: 100%;
+  background: #0b0b0f;
+  color: #fff;
+  padding: 40px 20px;
+  margin-top: 60px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.footer-section {
+  flex: 1;
+  min-width: 200px;
+}
+
+.footer-title {
+  font-size: 18px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.footer-text {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* botones estilo link */
+.footer-link {
+  display: block;
+  background: none;
+  border: none;
+  color: #bbb;
+  margin-bottom: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.footer-link:hover {
+  color: #fff;
+  transform: translateX(4px);
+}
+
+.footer-top-btn {
+  background: #1a1a22;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.footer-top-btn:hover {
+  background: #2a2a35;
+  transform: translateY(-2px);
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+
+  html, body {
+    overflow-x: hidden;
+  }
+
+  .skins-container {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .skins-header {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* =========================
+     HEADER
+  ========================= */
+  .top-navbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .top-navbar-right {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* =========================
+     GRID SKINS
+  ========================= */
+  .skins-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .skins-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .skin-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  .skin-card h5 {
+    font-size: 14px;
+  }
+
+  .skin-card p {
+    font-size: 12px;
+  }
+
+  /* =========================
+     FILTROS (DRAWER TABLET)
+  ========================= */
+  .skins-filters {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 380px;
+    height: 100vh;
+
+    background: #0f121e;
+    z-index: 1000;
+
+    padding: 20px;
+    overflow-y: auto;
+
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+
+    box-shadow: 10px 0 40px rgba(0,0,0,0.5);
+  }
+
+  .skins-filters.open {
+    transform: translateX(0);
+  }
+
+  /* OVERLAY */
+  .filters-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 999;
+  }
+
+  /* BOTÓN ABRIR FILTROS */
+  .mobile-filters-btn {
+    display: block;
+    z-index: 1100;
+  }
+
+  /* BOTÓN CERRAR */
+  .close-filters {
+    all: unset;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+
+    font-size: 24px;
+    cursor: pointer;
+    color: white;
+  }
+
+  /* EVITA DESBORDES */
+  .skins-filters * {
+    max-width: 100%;
+  }
+}
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+  }
+  .skins-header {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .top-navbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .top-navbar-right {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+    .skin-card img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  .skins-container {
+    width: 100%;
+    overflow-x: hidden;
+  }
+  .skins-content {
+    grid-template-columns: 1fr;
+  }
+
+  /* PANEL */
+  .skins-filters {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 85%;
+    height: 100vh;
+
+    background: #0f121e;
+    z-index: 1000;
+
+    padding: 20px;
+    overflow-y: auto;
+
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+
+    box-shadow: 10px 0 40px rgba(0,0,0,0.5);
+  }
+
+  .skins-filters.open {
+    transform: translateX(0);
+  }
+
+  /* OVERLAY */
+  .filters-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 999;
+  }
+
+  /* BOTÓN ABRIR */
+  .mobile-filters-btn {
+    display: block;
+    position: relative;
+  }
+
+  /* BOTÓN CERRAR */
+.close-filters {
+  all: unset;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+}
 }

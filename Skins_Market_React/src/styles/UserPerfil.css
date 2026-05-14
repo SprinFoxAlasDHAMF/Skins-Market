@@ -11,7 +11,13 @@ body {
   color: #e6e9f0;
   font-family: 'Helvetica Neue', Arial, sans-serif;
 }
-
+.perfil-verificacion {
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #111;
+  color: white;
+}
 .perfil-container {
   max-width: 620px;
   width: 100%;

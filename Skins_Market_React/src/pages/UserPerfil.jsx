@@ -13,7 +13,8 @@ function UserPerfil() {
   const [preview, setPreview] = useState(null);
   const [user, setUser] = useState(null);
   const [errores, setErrores] = useState({});
-
+  const [resending, setResending] = useState(false);
+  const [emailVerificado, setEmailVerificado] = useState(false);
   const [nombreInicial, setNombreInicial] = useState("");
   const [fotoInicial, setFotoInicial] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -23,6 +24,9 @@ function UserPerfil() {
       .then(res => {
         setUser(res.data);
         setNombre(res.data.nombre);
+
+        setEmailVerificado(res.data.email_verificado);
+
         setNombreInicial(res.data.nombre);
         setFotoInicial(res.data.foto_perfil);
 
@@ -157,6 +161,38 @@ function UserPerfil() {
           >
             {t("save_changes")}
           </button>
+        </div>
+        <div className="perfil-verificacion">
+          <h3>Estado del email</h3>
+
+          {emailVerificado ? (
+            <p style={{ color: "green", fontWeight: "bold" }}>
+              ✔ Email verificado
+            </p>
+          ) : (
+            <>
+              <p style={{ color: "orange", fontWeight: "bold" }}>
+                ⚠ Email no verificado
+              </p>
+
+              <button
+                className="btn-custom btn-warning-custom"
+                disabled={resending}
+                onClick={async () => {
+                  setResending(true);
+                  try {
+                    const res = await api.post("/email/resend-verification");
+                  } catch (err) {
+                      console.log(err.response?.data);
+                  } finally {
+                    setResending(false);
+                  }
+                }}
+              >
+                {resending ? "Enviando..." : "Reenviar verificación"}
+              </button>
+            </>
+          )}
         </div>
       </form>
 

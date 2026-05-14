@@ -108,7 +108,7 @@ export default function Visor3D({ modeloUrl, onClose }) {
           {/* OrbitControls permite rotar, hacer zoom y mover el modelo con el ratón */}
           <OrbitControls 
             makeDefault 
-            // Si el usuario empieza a rotar manualmente, esto ayuda a que la cámara sea fluida
+            //Esto ayuda a que la cámara sea fluida
             enableDamping={true}
             dampingFactor={0.05}
           />

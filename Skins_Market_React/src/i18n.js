@@ -14,6 +14,14 @@ i18n
     resources: {
       es: {
         translation: {
+          "footer": {
+            "title": "Skins Market",
+            "rights": "Todos los derechos reservados",
+            "back_to_skins": "Volver a skins",
+            "favorites": "Favoritos",
+            "profile": "Mi perfil",
+            "top": "Ir arriba"
+          },
           title: "Skins CS2",
           explore: "Explorar Skins",
 
@@ -171,10 +179,19 @@ i18n
         "view_skins": "Ver skins"
           
       },
+
       
 
       en: {
         translation: {
+          "footer": {
+            "title": "Skins Market",
+            "rights": "All rights reserved",
+            "back_to_skins": "Back to skins",
+            "favorites": "Favorites",
+            "profile": "My profile",
+            "top": "Back to top"
+          },
           title: "CS2 Skins",
           explore: "Browse Skins",
 

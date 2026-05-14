@@ -6,8 +6,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Filament\Models\Contracts\FilamentUser;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\VerifyEmailCustom;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     use HasApiTokens, Notifiable;
     // Define la tabla explícitamente si es necesario
@@ -78,5 +80,10 @@ class User extends Authenticatable implements FilamentUser
     public function favoritos()
     {
         return $this->belongsToMany(Item::class, 'favoritos', 'usuario_id', 'item_id')->withTimestamps();
+    }
+
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new VerifyEmailCustom());
     }
 }

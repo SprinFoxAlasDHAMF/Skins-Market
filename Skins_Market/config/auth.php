@@ -113,4 +113,9 @@ return [
 
     'password_timeout' => 10800,
 
+    'users' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\User::class,
+    ],
+
 ];

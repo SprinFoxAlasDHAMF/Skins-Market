@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -12,3 +13,15 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+
+    return redirect('http://localhost:5173/login');
+})->middleware(['signed'])->name('verification.verify');
+
+Route::get('/email/verify', function () {
+    return response()->json([
+        'message' => 'Debes verificar tu email'
+    ]);
+})->middleware('auth:sanctum')->name('verification.notice');

@@ -22,6 +22,8 @@ class UserPerfilController extends Controller
                 'saldo_disponible_centavos' => $saldoStripe['amount_in_cents'],
                 'saldo_moneda' => $saldoStripe['currency'],
                 'saldo_fuente' => $saldoStripe['source'],
+                'email_verificado' => !is_null($usuario->email_verified_at),
+
             ]
         ));
     }

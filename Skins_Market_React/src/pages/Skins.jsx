@@ -4,9 +4,18 @@ import api from "../api/api";
 import { isLoggedIn, logout, isAdmin } from "../utils/auth";
 import "../styles/Skins.css";
 import { useTranslation } from "react-i18next";
-
+  import { 
+    FiUser, 
+    FiHeart, 
+    FiLogOut, 
+    FiSun, 
+    FiMoon, 
+    FiPlus,
+    FiGlobe
+  } from "react-icons/fi";
 function Skins() {
   const navigate = useNavigate();
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [skins, setSkins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -33,6 +42,18 @@ function Skins() {
     order_by: "nombre",
     order_dir: "asc",
   });
+  const [isMobile, setIsMobile] = useState(false);
+
+useEffect(() => {
+  const checkSize = () => {
+    setIsMobile(window.innerWidth <= 1024);
+  };
+
+  checkSize();
+  window.addEventListener("resize", checkSize);
+
+  return () => window.removeEventListener("resize", checkSize);
+}, []);
   const mostrarSoloPegatinas = modoPegatina !== "";
   // Verifica login y trae filtros
   useEffect(() => {
@@ -135,6 +156,9 @@ function Skins() {
     e.preventDefault();
     fetchSkins();
   };
+
+
+
   const handleReset = () => {
     setSearch("");
     setModoPegatina(""); 
@@ -167,57 +191,140 @@ function Skins() {
     }
   };
   return (
+    <>
     <div className={`skins-container ${!isDarkMode ? "light-theme" : ""}`}>
-      <div className="skins-header">
-      <h1>{t("title")}</h1>        
-      <div className="lang-switcher">
-        <button className="btn-custom btn-secondary-custom" onClick={() => i18n.changeLanguage("es")}>ES</button>
-        <button className="btn-custom btn-secondary-custom" onClick={() => i18n.changeLanguage("en")}>EN</button>
-      </div>
-        <div className="skins-header-actions">
-          <button 
-            className="btn-custom btn-theme-toggle" 
-            onClick={() => setIsDarkMode(!isDarkMode)}
-          >
-            {isDarkMode ? "☀️ Modo Claro" : "🌙 Modo Oscuro"}
-          </button>
-          
-          <button onClick={logout}>{t("logout")}</button>
-          <button onClick={() => navigate("/perfil")}>{t("perfil")}</button>
-          <button onClick={() => navigate("/qui-som")}>{t("quien_somos")}</button>
-          <button onClick={() => navigate("/favoritos")}>{t("favoritos")}</button>
-          {isAdmin() && (
-            <button className="btn-custom btn-success-custom" onClick={() => navigate("/admin/skins/new")}>
-              Crear Skin
+      <div className="skins-header">    
+
+        <div className="top-navbar">
+          <div className="top-navbar-left">
+            <h1>{t("title")}</h1>
+          </div>
+
+          <div className="top-navbar-right">
+          {isMobile && (
+            <button
+              className="icon-btn mobile-filters-btn"
+              onClick={() => setFiltersOpen(true)}
+              title="Filtros"
+            >
+              ☰
             </button>
           )}
+
+            <button
+              className="icon-btn"
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              title="Theme"
+            >
+              {isDarkMode ? <FiSun /> : <FiMoon />}
+            </button>
+
+            <button
+              className="icon-btn"
+              onClick={() => navigate("/favoritos")}
+              title="Favoritos"
+            >
+              <FiHeart />
+            </button>
+
+            <button
+              className="icon-btn"
+              onClick={() => navigate("/perfil")}
+              title="Perfil"
+            >
+              <FiUser />
+            </button>
+
+            <button
+              className="icon-btn"
+              onClick={() => navigate("/qui-som")}
+              title="Idioma"
+            >
+              <FiGlobe />
+            </button>
+
+            {isAdmin() && (
+              <button
+                className="icon-btn admin"
+                onClick={() => navigate("/admin/skins/new")}
+                title="Crear Skin"
+              >
+                <FiPlus />
+              </button>
+            )}
+
+            <button
+              className="icon-btn logout"
+              onClick={logout}
+              title="Logout"
+            >
+              <FiLogOut />
+            </button>
+
+            <div className="lang-switcher">
+              <button className="btn-custom btn-secondary-custom" onClick={() => i18n.changeLanguage("es")}>
+                ES
+              </button>
+              <button className="btn-custom btn-secondary-custom" onClick={() => i18n.changeLanguage("en")}>
+                EN
+              </button>
+            </div>
+
+          </div>
         </div>
-        <div className="filter-group">
-          <label>{t("ordenar")}</label>
+        <div className="filter-group sort-group">
 
-          <select
-            name="order_combined"
-            value={`${filters.order_by}-${filters.order_dir}`}
-            onChange={(e) => {
-              const [by, dir] = e.target.value.split("-");
-              setFilters(prev => ({ ...prev, order_by: by, order_dir: dir }));
-            }}
-          >
-            <option value="id-asc">{t("sort_none")}</option>
+          <label className="filter-label">
+            {t("ordenar")}
+          </label>
 
-            <option value="nombre-asc">{t("sort_name_asc")}</option>
-            <option value="nombre-desc">{t("sort_name_desc")}</option>
+          <div className="sort-wrapper">
 
-            <option value="precio-asc">{t("sort_price_asc")}</option>
-            <option value="precio-desc">{t("sort_price_desc")}</option>
-          </select>
-        </div>
+            <select
+              name="order_combined"
+              className="sort-select"
+              value={`${filters.order_by}-${filters.order_dir}`}
+              onChange={(e) => {
+                const [by, dir] = e.target.value.split("-");
+                setFilters(prev => ({
+                  ...prev,
+                  order_by: by,
+                  order_dir: dir
+                }));
+              }}
+            >
+              <option value="id-asc">🔄 {t("sort_none")}</option>
+
+              <option value="nombre-asc">🔤 {t("sort_name_asc")}</option>
+              <option value="nombre-desc">🔤 {t("sort_name_desc")}</option>
+
+              <option value="precio-asc">💰 {t("sort_price_asc")}</option>
+              <option value="precio-desc">💰 {t("sort_price_desc")}</option>
+            </select>
+
+            <span className="sort-icon">⇅</span>
+
+          </div>
       </div>
 
       <div className="skins-content">
         {/* FILTROS */}
+        {filtersOpen && (
+          <div
+            className="filters-overlay"
+            onClick={() => setFiltersOpen(false)}
+          />
+        )}
         
-        <div className="skins-filters">
+        <div className={`skins-filters ${filtersOpen ? "open" : ""}`}>       
+        {isMobile && (
+          <button
+            className="close-filters"
+            onClick={() => setFiltersOpen(false)}
+          >
+            ✕
+          </button>
+        )}
         <h4>{t("filters")}</h4>
          <div className="filter-group">
           <label>{t("search_name")}</label>
@@ -367,8 +474,52 @@ function Skins() {
                 </div>
             )}
         </div>
+    </div>
 
-  );
+<footer className="app-footer">
+
+  <div className="footer-container">
+
+    {/* LEFT */}
+    <div className="footer-section footer-left">
+      <h4 className="footer-title">{t("footer.title")}</h4>
+
+      <p className="footer-text">
+        © {new Date().getFullYear()} - {t("footer.rights")}
+      </p>
+    </div>
+
+    {/* CENTER */}
+    <div className="footer-section footer-center">
+      <button onClick={() => navigate("/skins")} className="footer-link">
+        {t("footer.back_to_skins")}
+      </button>
+
+      <button onClick={() => navigate("/favoritos")} className="footer-link">
+        {t("footer.favorites")}
+      </button>
+
+      <button onClick={() => navigate("/perfil")} className="footer-link">
+        {t("footer.profile")}
+      </button>
+    </div>
+
+    {/* RIGHT */}
+    <div className="footer-section footer-right">
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        className="footer-top-btn"
+      >
+        ↑ {t("footer.top")}
+      </button>
+    </div>
+
+  </div>
+
+</footer>
+  </>
+);
+  
 }
 
 export default Skins;

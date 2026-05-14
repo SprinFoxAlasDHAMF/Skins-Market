@@ -4,7 +4,13 @@ import api from "../api/api";
 import { isLoggedIn, logout } from "../utils/auth";
 import "../styles/Favoritos.css";
 import { useTranslation } from "react-i18next";
-
+import {
+  FiArrowLeft,
+  FiUser,
+  FiLogOut,
+  FiHeart,
+  FiEye
+} from "react-icons/fi";
 function Favoritos() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -45,23 +51,33 @@ function Favoritos() {
   return (
     <div className="favoritos-container">
 
-      <div className="favoritos-header">
-        <h1>{t("favorites_title")}</h1>
+    <div className="favoritos-header-actions">
 
-        <div className="favoritos-header-actions">
-          <button onClick={() => navigate("/skins")}>
-            ← {t("back_to_skins")}
-          </button>
+      <button
+        className="icon-btn"
+        onClick={() => navigate("/skins")}
+        title="Back"
+      >
+        <FiArrowLeft />
+      </button>
 
-          <button onClick={() => navigate("/perfil")}>
-            {t("profile")}
-          </button>
+      <button
+        className="icon-btn"
+        onClick={() => navigate("/perfil")}
+        title="Profile"
+      >
+        <FiUser />
+      </button>
 
-          <button onClick={logout}>
-            {t("logout")}
-          </button>
-        </div>
-      </div>
+      <button
+        className="icon-btn logout"
+        onClick={logout}
+        title="Logout"
+      >
+        <FiLogOut />
+      </button>
+
+    </div>
 
       {loading && (
         <p className="loading-text">{t("loading_favorites")}</p>
@@ -140,7 +156,7 @@ function Favoritos() {
       )}
 
     </div>
-  );
+  );  
 }
 
 export default Favoritos;
